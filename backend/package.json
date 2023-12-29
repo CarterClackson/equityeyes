@@ -4,6 +4,7 @@
   "description": "backend for EquityEyes - stock tracking/analysis application",
   "main": "app.js",
   "scripts": {
+    "start" : "npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

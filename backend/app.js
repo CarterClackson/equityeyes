@@ -11,6 +11,7 @@ const uri = `mongodb+srv://${username}:${password}@equityeye.7ehlkcc.mongodb.net
 
 const userRoutes = require('./routes/userRoutes');
 const stockRoutes = require('./routes/stockRoutes');
+const stocksRoutes = require('./routes/stocksRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use(express.json());
 
 //Middleware routes
 app.use('/stock', stockRoutes);
+app.use('/stocks', stocksRoutes);
 app.use('/user', userRoutes)
 
 

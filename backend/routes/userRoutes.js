@@ -1,3 +1,5 @@
+/* Routes for dealing with authenticated requests */
+
 const express = require('express');
 const { validationResult } = require('express-validator');
 const axios = require('axios');
@@ -84,7 +86,8 @@ router.post('/login', async (req, res) => {
 
 router.post('/stocks/add', verifyToken, async (req, res) => {
     const userID = req.user.userId;
-    const savedStock = req.body.savedStock.toUpperCase();
+    const savedStockTicker = req.body.savedStock.ticker.toUpperCase();
+    const savedStockPrice = req.body.savedStock.buyInPrice;
 
     let user;
 
@@ -101,11 +104,12 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
     if(user.savedStocks.length >= 5) {
         return res.status(429).json({ message: 'Due to API limitations, you can only add 5 saved stocks at a time.' });
     }
+    const existingStock = user.savedStocks.find(stock => stock.ticker === savedStockTicker);
 
-    if (user.savedStocks.includes(savedStock)) {
+    if (existingStock) {
         return res.status(409).json({ message: 'User has already saved this stock' });
     } else {
-        user.savedStocks.push(savedStock);
+        user.savedStocks.push({ ticker: savedStockTicker, buyInPrice: savedStockPrice });
         try {
             await user.save();
             return res.status(200).json({ message: 'Saved stock to user.' })
@@ -132,10 +136,11 @@ router.delete('/stocks/delete', verifyToken, async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: 'Something went wrong, could not update user.' });
     }
-    if (!user.savedStocks.includes(stockToDelete)) {
+    const existingStock = user.savedStocks.find(stock => stock.ticker === stockToDelete);
+    if (!existingStock) {
         return res.status(409).json({ message: 'User has not saved this stock' });
     } else {
-        user.savedStocks = user.savedStocks.filter(stock => stock !== stockToDelete);
+        user.savedStocks = user.savedStocks.filter(stock => stock.ticker !== stockToDelete);
         try {
             await user.save();
             return res.status(200).json({ message: 'Stock removed from user' })
@@ -153,25 +158,26 @@ router.get('/stocks', verifyToken, async (req, res) => {
   
     try {
       user = await User.findOne({ _id: userID });
-      const currentDate = new Date();
-      const yesterday = new Date(currentDate);
-      yesterday.setDate(currentDate.getDate() - 1);
-      const formattedYesterday = yesterday.toISOString().split('T')[0];
   
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
   
       const savedStocks = user.savedStocks;
-      if (savedStocks) {
-        const stockDataPromises = savedStocks.map(async symbol => {
-            const response = await axios.get(`${baseURL}/open-close/${symbol}/${formattedYesterday}`, {
+      if (savedStocks && savedStocks.length > 0) {
+        const currentDate = new Date();
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(currentDate.getDate() - 1);
+        const formattedYesterday = yesterday.toISOString().split('T')[0];
+
+        const stockDataPromises = savedStocks.map(async stock => {
+            const response = await axios.get(`${baseURL}/open-close/${stock.ticker}/${formattedYesterday}`, {
               params: {
                 adjusted: true,
                 apiKey: apiKey,
               }
             });
-            return { symbol, data: response.data };
+            return { symbol: stock.ticker, buyInPrice: stock.buyInPrice, data: response.data };
           });
           const stockData = await Promise.all(stockDataPromises);
           return res.status(201).json(stockData);

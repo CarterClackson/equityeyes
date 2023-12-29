@@ -6,7 +6,16 @@ const userSchema = new Schema({
   name: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, minlength: 6 },
-  savedStocks: [{ type: String, required: false }]
+  savedStocks: [
+    {
+        ticker: { type: String, required: false },
+        buyInPrice: { type: String, required: false },
+    }
+  ],
+  settings: {
+    currency: { type: String, require: false },
+    markets: [{ type: String, required: false }],
+  }
 });
 
 
