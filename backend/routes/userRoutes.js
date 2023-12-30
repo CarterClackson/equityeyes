@@ -1,6 +1,7 @@
 /* Routes for dealing with authenticated requests */
 
 const express = require('express');
+const passport = require('passport');
 const { validationResult } = require('express-validator');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
@@ -48,6 +49,16 @@ router.post('/signup', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
+        // Password Validation
+        const minLength = 8;
+        const hasLetter = /[a-zA-Z]/.test(password);
+        const hasNumber = /\d/.test(password);
+        const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
+
+        if (!(password.length >= minLength && hasLetter && hasNumber && hasSpecialChar)) {
+            return res.status(400).json({ error: 'Invalid password. Please ensure it has at least 8 characters and includes letters, numbers, and at least one special character' });
+        }
+
         const newUser = new User({
             name: name,
             email: email,
@@ -55,12 +66,16 @@ router.post('/signup', async (req, res) => {
             savedStocks: [],
         });
 
-        await newUser.save();
+        try {
+            await newUser.save();
 
-        const token = jwt.sign({ userId: newUser.id, email: newUser.email }, secretKey, { expiresIn: '1h' });
-        console.log(newUser);
-
-        res.status(201).json({ message: 'User created successfully', token });
+            const token = jwt.sign({ userId: newUser.id, email: newUser.email }, secretKey, { expiresIn: '1h' });
+            console.log(newUser);
+            res.status(201).json({ message: 'User created successfully', token });
+        } catch (validationError) {
+            console.log(validationError);
+            res.status(400).json({ error: 'Invalid password.' });
+        }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -75,6 +90,11 @@ router.post('/login', async (req, res) => {
     }
   
     const user = getUserByEmail(email);
+
+    // If the user has a social login, return an error
+    if (user.socialAccounts && user.socialAccounts.length > 0) {
+        return res.status(401).json({ error: 'You normally log in with a social account.' });
+    }
   
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Invalid email or password' });
@@ -84,10 +104,82 @@ router.post('/login', async (req, res) => {
     res.status(200).json({ message: 'Login successful', token });
 });
 
+
+router.patch('/update/user-data', verifyToken, async (req, res) => {
+    const userID = req.user.userId;
+    const updateUserData = req.body;
+
+    try {
+        const user = await User.findOneAndUpdate(
+            { _id: userID },
+            { $set: updateUserData },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ message: 'User data updated successfully', user });
+    } catch (error) {
+        console.error('Error updating user data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.patch('/update/markets', verifyToken, async (req, res) => {
+    const userID = req.user.userId;
+    const updateMarketsData = req.body;
+
+    try {
+        const user = await User.findById(userID);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Update: Add markets
+        if (updateMarketsData.add && updateMarketsData.add.length > 0) {
+            await User.findByIdAndUpdate(userID, { $addToSet: { 'settings.markets': { $each: updateMarketsData.add } } });
+        }
+
+        // Update: Remove markets
+        if (updateMarketsData.remove && updateMarketsData.remove.length > 0) {
+            await User.findByIdAndUpdate(userID, { $pullAll: { 'settings.markets': updateMarketsData.remove } });
+        }
+
+        // Fetch the updated user
+        const updatedUser = await User.findById(userID);
+
+        res.json({ message: 'Markets updated successfully', user: updatedUser });
+    } catch (error) {
+        console.error('Error updating markets:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
 router.post('/stocks/add', verifyToken, async (req, res) => {
     const userID = req.user.userId;
     const savedStockTicker = req.body.savedStock.ticker.toUpperCase();
-    const savedStockPrice = req.body.savedStock.buyInPrice;
+
+
+    try {
+        const currentDate = new Date();
+        const yesterday = new Date(currentDate);
+        yesterday.setDate(currentDate.getDate() - 1);
+        const formattedYesterday = yesterday.toISOString().split('T')[0];
+
+        const response = await axios.get(`${baseURL}/open-close/${savedStockTicker}/${formattedYesterday}`, {
+            params: {
+              adjusted: true,
+              apiKey: apiKey,
+            }
+          });
+          savedStockPrice = response.data.close;
+    } catch (error) {
+    console.error(error);
+      return res.status(500).json({ error: 'Internal Server Error' });
+    }
 
     let user;
 

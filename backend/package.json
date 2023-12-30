@@ -4,7 +4,7 @@
   "description": "backend for EquityEyes - stock tracking/analysis application",
   "main": "app.js",
   "scripts": {
-    "start" : "npm start",
+    "start": "npm start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -20,6 +20,9 @@
     "mongodb": "^6.3.0",
     "mongoose": "^8.0.3",
     "passport": "^0.7.0",
+    "passport-facebook": "^3.0.0",
+    "passport-github": "^1.1.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
     "uuid": "^9.0.1"
   },
