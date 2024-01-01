@@ -70,7 +70,6 @@ router.post('/signup', async (req, res) => {
             await newUser.save();
 
             const token = jwt.sign({ userId: newUser.id, email: newUser.email }, secretKey, { expiresIn: '1h' });
-            console.log(newUser);
             res.status(201).json({ message: 'User created successfully', token });
         } catch (validationError) {
             console.log(validationError);
@@ -89,19 +88,22 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
   
-    const user = getUserByEmail(email);
+    const user = await getUserByEmail(email);
+
+    if (!user) {
+        return res.status(401).json({ error: 'Invalid email or password' });
+    }
 
     // If the user has a social login, return an error
     if (user.socialAccounts && user.socialAccounts.length > 0) {
         return res.status(401).json({ error: 'You normally log in with a social account.' });
     }
-  
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+        return res.status(401).json({ error: 'Invalid email or password' });
     }
     const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '1h' });
   
-    res.status(200).json({ message: 'Login successful', token });
+    return res.status(200).json({ message: 'Login successful', token });
 });
 
 
@@ -151,10 +153,10 @@ router.patch('/update/markets', verifyToken, async (req, res) => {
         // Fetch the updated user
         const updatedUser = await User.findById(userID);
 
-        res.json({ message: 'Markets updated successfully', user: updatedUser });
+        return res.json({ message: 'Markets updated successfully', user: updatedUser });
     } catch (error) {
         console.error('Error updating markets:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

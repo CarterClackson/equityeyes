@@ -9,7 +9,7 @@ require('dotenv').config();
 
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
-const uri = `mongodb+srv://${username}:${password}@equityeye.7ehlkcc.mongodb.net/equityEye?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${username}:${password}@equityeye.7ehlkcc.mongodb.net/equityEye-test?retryWrites=true&w=majority`;
 const secretKey = process.env.AUTH_SECRET_KEY;
 
 const authRoutes = require('./routes/authRoutes');
@@ -40,10 +40,14 @@ mongoose
     uri
   )
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
+    if (process.env.NODE_ENV !== 'test') {
+      app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+      });
+    }
   })
   .catch(err => {
       console.log(err);
   });
+
+  module.exports = app;

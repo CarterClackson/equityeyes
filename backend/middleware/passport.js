@@ -1,6 +1,5 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
 const GitHubStrategy = require('passport-github').Strategy;
 const User = require('../models/user');
 
@@ -54,6 +53,35 @@ passport.use(new GoogleStrategy({
         });
 
         return done (null, newUser);
+    } catch (error) {
+        console.log(error);
+        return done(error, null);
+    }
+}));
+
+passport.use(new GitHubStrategy({
+    clientID: process.env.GITHUB_CLIENT_ID,
+    clientSecret: process.env.GITHUB_CLIENT_SECRET,
+    callbackURL: 'http://localhost:3000/auth/github/callback',
+}, async (accessToken, refreshToken, profile, done) => {
+    try {
+        const existingUser = await User.findOne({ 'socialAccounts.socialId': profile.id });
+
+        if (existingUser) {
+            // User already exists, proceed
+            return done(null, existingUser);
+        }
+
+        const newUser = await User.create({
+            name: profile.username,
+            email: profile.emails && profile.emails[0] ? profile.emails[0].value : '',
+            socialAccounts: [{
+                provider: 'github',
+                socialId: profile.id,
+            }],
+        });
+
+        return done(null, newUser);
     } catch (error) {
         console.log(error);
         return done(error, null);

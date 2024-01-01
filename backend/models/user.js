@@ -4,17 +4,23 @@ const Schema = mongoose.Schema;
 
 const socialSchema = new Schema({
     provider: { type: String, required: true },
-    socialId: { type: String, required: true, unique: true },
+    socialId: { type: String, required: false, unique: true },
   });
 
 const userSchema = new Schema({
   name: { type: String },
-  email: { type: String, required: true, unique: true },
+  email: { type: String,
+    required: function() {
+      // Make password required only if there is no social account
+      return this.socialAccounts.length === 0;
+    },
+    unique: true, 
+  },
   password: {
     type: String,
     required: function() {
       // Make password required only if there is no social account
-      return this.socialAccounts.length === 0;
+      return !this.socialAccounts || this.socialAccounts.length === 0;
     },
     validate: {
         validator: function (password) {

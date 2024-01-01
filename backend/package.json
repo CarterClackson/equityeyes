@@ -4,8 +4,8 @@
   "description": "backend for EquityEyes - stock tracking/analysis application",
   "main": "app.js",
   "scripts": {
-    "start": "npm start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "NODE_ENV=production npm start",
+    "test": "NODE_ENV=test jest --detectOpenHandles --verbose"
   },
   "author": "",
   "license": "ISC",
@@ -27,6 +27,8 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "nodemon": "^3.0.2"
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.2",
+    "supertest": "^6.3.3"
   }
 }

@@ -10,8 +10,7 @@ const verifyToken = require('../middleware/authenticate');
 
 const router = express.Router();
 
-// localhost:3000/stocks?paginated=true&page=1pageSize=100 - paginated requests
-// localhost:3000/stocks - everything.
+
 router.get('/', verifyToken, async (req, res) => {
     const userID = req.user.userId;
     let user;
@@ -35,7 +34,7 @@ router.get('/', verifyToken, async (req, res) => {
 
     const isPaginatedRequest = req.query.paginated === 'true';
 
-    const page = parseInt(req.query.page) || 1;
+    const page = req.query.page !== undefined ? parseInt(req.query.page) : 0;
     const pageSize = parseInt(req.query.pageSize) || 100;
 
 

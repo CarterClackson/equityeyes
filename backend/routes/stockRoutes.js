@@ -42,7 +42,6 @@ const apiKey = process.env.POLYGON_API_KEY;
 
 router.get('/:symbol/news', async (req, res) => {
     const symbol = req.params.symbol.toUpperCase();
-    console.log(symbol);
 
     try {
         const newsUrl = `https://api.polygon.io/v2/reference/news?ticker=${symbol}&limit=3&apiKey=${apiKey}`;
