@@ -92,4 +92,30 @@ router.get('/:symbol', async (req, res) => {
     }
 });
 
+router.get('/:symbol/history', async (req, res) => {
+  const symbol = req.params.symbol.toUpperCase();
+  const timespan = req.query.timespan || 'day';
+  const limit = req.query.limit || 365;
+
+  try {
+    const endDate = new Date(); // Current date
+    const startDate = new Date();
+    startDate.setFullYear(endDate.getFullYear() - 1);
+    const adjustedEndDate = endDate.toISOString().split('T')[0];
+    const adjustedStartDate = startDate.toISOString().split('T')[0];
+
+     const stockHistory = await axios.get(`https://api.polygon.io/v2/aggs/ticker/${symbol}/range/1/${timespan}/${adjustedStartDate}/${adjustedEndDate}`, {
+     params: {
+      limit: limit,
+      adjusted: true,
+      apiKey: apiKey,
+     }
+    });
+    return res.status(200).json(stockHistory.data);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

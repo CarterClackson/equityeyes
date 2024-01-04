@@ -202,6 +202,56 @@ GET
 }
 ```
 
+## Get Stock History
+Retrieve price history for specific stock
+
+### Endpoint
+/stock/:symbol/history
+
+### Method
+GET
+
+### Parameters
+- `symbol` (string): Stock symbol (e.g. AAPL).
+
+### Queries
+- `timespan` (string): Size of the time window (e.g. day).
+- `limit` (number): Limit the number of base aggregates (e.g. 365 - one year)
+
+### Example Request
+/stock/NVDA/history?timespan=day&limit=365
+
+### Example Response
+```
+{
+    "ticker": "NVDA",
+    "queryCount": 250,
+    "resultsCount": 250,
+    "adjusted": true,
+    "results": [
+        {
+            "v": 40127658,
+            "vw": 143.6812,
+            "o": 148.51,
+            "c": 143.15,
+            "h": 149.96,
+            "l": 140.96,
+            "t": 1672722000000,
+            "n": 424974
+        },
+        {
+            "v": 43132360,
+            "vw": 146.1524,
+            "o": 145.67,
+            "c": 147.49,
+            "h": 148.53,
+            "l": 142.41,
+            "t": 1672808400000,
+            "n": 367769
+        }...
+}
+```
+
 # User's Routes
 
 ## Get User's Stocks

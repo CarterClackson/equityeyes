@@ -3,6 +3,14 @@ const express = require('express');
 const stockRoutes = require('../routes/stockRoutes');
 const axios = require('axios');
 
+beforeAll(async () => {
+  server = app.listen(3000);
+});
+
+afterAll(async () => {
+  server.close();
+});
+
 jest.mock('axios');
 
 const app = express();
@@ -66,5 +74,14 @@ describe('Stock Routes', () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('stock');
     expect(response.body).toHaveProperty('ticker');
+  });
+
+  it('should get stock history for a stock', async () => {
+    const symbol = 'AAPL';
+
+    const response = await request(app).get(`/stock/${symbol}/history?timespan=day&limit=365`);
+
+    expect(response.status).toBe(200);
+    // Add additional assertions based on the expected response for stock history
   });
 });

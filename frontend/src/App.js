@@ -1,24 +1,46 @@
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { setAuthToken, getAuthToken } from '../src/utils/cookieUtils';
+
 import './App.css';
 
-function App() {
+import HomePage from './pages/Home';
+import AuthData from './pages/Dashboard';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import LoadingSpinner from './components/UIElements/LoadingSpinner';
+
+const App = () => {
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
+
+
+  useEffect(() => {
+    // Check for the existence of the authentication token from the backend
+    const userToken = getAuthToken();
+
+    if (userToken) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+
+    // Mark the initial check as complete
+    setInitialCheckComplete(true);
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} ></Route>
+        <Route path="/login" element={<Login />} />
+        <Route
+          path="/dashboard"
+          element={isLoggedIn ? <Dashboard /> : <Login />}
+        />
+      </Routes>
+    </Router>
   );
 }
 

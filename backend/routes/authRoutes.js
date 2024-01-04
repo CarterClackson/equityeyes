@@ -11,6 +11,16 @@ const secretKey = process.env.AUTH_SECRET_KEY;
 const User = require('../models/user');
 const { restart } = require('nodemon');
 
+const handleTokenGeneration = (req, res, user) => {
+    const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '7d' });
+
+    console.log(token); // Log the token (optional)
+    //res.status(200).json({ message: 'Login successful', token });
+    res.cookie('authToken', token, { 
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.redirect('http://localhost:3005/dashboard');
+};
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
@@ -31,7 +41,7 @@ router.get('/google/callback',
                     console.error(err);
                     return res.status(500).json({ error: 'Internal Server Error' });
                 }
-                next();
+                handleTokenGeneration(req, res, user);
             });
         })(req, res, next);
     },
@@ -39,16 +49,6 @@ router.get('/google/callback',
         if (!req.user) {
             return res.status(401).json({ error: 'Authentication failed' });
         }
-
-        function handleTokenGeneration() {
-            const user = req.user;
-            const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '1h' });
-
-            console.log(token); // Log the token (optional)
-            res.status(200).json({ message: 'Login successful', token });
-        }
-
-        handleTokenGeneration();
     }
 );
 
@@ -56,7 +56,7 @@ router.get('/github', passport.authenticate('github'));
 
 router.get('/github/callback',
     (req, res, next) => {
-        passport.authenticate('github', (err, user, info) => {
+        passport.authenticate('github', { failureRedirect: 'http://localhost:3005/login-failed' },  (err, user, info) => {
             if (err) {
                 // Handle unexpected errors
                 console.error(err);
@@ -74,8 +74,7 @@ router.get('/github/callback',
                     console.error(err);
                     return res.status(500).json({ error: 'Internal Server Error' });
                 }
-
-                next();
+                handleTokenGeneration(req, res, user);
             });
         })(req, res, next);
     },
@@ -84,20 +83,6 @@ router.get('/github/callback',
         if (!req.user) {
             return res.status(401).json({ error: 'Authentication failed' });
         }
-
-        // Handle token generation
-        function handleTokenGeneration() {
-            const user = req.user;
-            const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '1h' });
-
-            console.log(token); // Log the token (optional)
-
-            // Respond with the token
-            res.status(200).json({ message: 'Login successful', token });
-        }
-
-        // Call the token generation function
-        handleTokenGeneration();
     }
 );
 

@@ -2,6 +2,7 @@ const express = require('express');
 const session = require('express-session');
 const axios = require('axios');
 const mongoose = require('mongoose');
+const cors = require('cors');
 
 const passportConfig = require('./middleware/passport');
 
@@ -9,7 +10,7 @@ require('dotenv').config();
 
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
-const uri = `mongodb+srv://${username}:${password}@equityeye.7ehlkcc.mongodb.net/equityEye-test?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${username}:${password}@equityeye.7ehlkcc.mongodb.net/equityEye?retryWrites=true&w=majority`;
 const secretKey = process.env.AUTH_SECRET_KEY;
 
 const authRoutes = require('./routes/authRoutes');
@@ -22,6 +23,15 @@ const PORT = process.env.PORT || 3000;
 
 // Define middleware to parse JSON requests
 app.use(express.json());
+
+const corsOptions = {
+  origin: 'http://localhost:3005',
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
 
 //Passport middleware
 app.use(session({ secret: secretKey, resave: true, saveUninitialized: true }));
