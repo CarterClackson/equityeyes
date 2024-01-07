@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client';
 import { getAuthToken } from '../utils/cookieUtils';
 
 import StockSearch from './UIElements/StockSearch';
+import DetailsView from './UIElements/DetailsView';
 
 import "../styles/DataPanel.css";
 
@@ -15,6 +16,8 @@ const DataPanel = props => {
     const getUserId = props.getUserId;
 
     const [showSearch, setShowSearch] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
+    const [detailsData, setDetailsData] = useState({});
 
     const arrowColor = (currentPrice, buyInPrice) => {
         return currentPrice > buyInPrice ? 'text-green-500' : 'text-red-500'
@@ -27,8 +30,12 @@ const DataPanel = props => {
     const handleResetShowSearch = () => {
         setShowSearch(false);
     }
+    const handleResetDetails = () => {
+        setShowDetails(false);
+    }
 
-    const handleRemoveStock = async (stockTicker) => {
+    const handleRemoveStock = async (e, stockTicker) => {
+        e.stopPropagation();
         props.isLoading(true);
         try {
             const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}user/stocks/delete`, {
@@ -41,7 +48,6 @@ const DataPanel = props => {
                     'stockToDelete': stockTicker
                 }),
             });
-            console.log(response);
             
             if (!response.ok) {
                 throw new Error('Network response not ok');
@@ -62,9 +68,6 @@ const DataPanel = props => {
     }
 
     const loadDetailsView = async (stockTicker) => {
-        /*
-        props.isLoading(true);
-
         try {
             const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${stockTicker}`, {
                 method: 'GET',
@@ -77,14 +80,12 @@ const DataPanel = props => {
                     console.log(response);
                 }
 
-                const data = await response.json();
-                console.log(data);
-                props.isLoading(false);
+                const detailsData = await response.json();
+                setShowDetails(true);
+                setDetailsData(detailsData)
         } catch (error) {
             console.log(error);
-            props.isLoading(false);
         }
-        */
     }
     
     return (
@@ -93,10 +94,10 @@ const DataPanel = props => {
                 <h1 className="text-3xl font-bold pb-4">My Stocks</h1>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {data.map((stock, index) => (
-                    <div key={index} onClick={() => loadDetailsView(stock.symbol)}className="relative bg-emerald-900 border-4 border-transparent p-6 rounded-lg hover:border-4 hover:border-emerald-700 transition-all cursor-pointer">
-                        <span className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3" onClick={() => handleRemoveStock(stock.symbol)}><i class="fas fa-solid fa-x"></i></span>
-                        <p className="text-xl font-semibold mb-2">Symbol: {stock.symbol}</p>
-                        <p className="text-zinc-50 mb-2">Buy-in Price: {stock.buyInPrice}</p>
+                    <div key={index} onClick={() => loadDetailsView(stock.symbol)} className="relative bg-emerald-900 border-4 border-transparent p-6 rounded-lg hover:border-4 hover:border-emerald-700 transition-all cursor-pointer">
+                        <span className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3 z-10" onClick={(e) => handleRemoveStock(e, stock.symbol)}><i class="fas fa-solid fa-x"></i></span>
+                        <p className="text-xl font-semibold mb-2">{stock.symbol}</p>
+                        <p className="text-zinc-50 mb-2">Saved Price: {stock.buyInPrice}</p>
                         <ul className="text-zinc-50">
                             <li>
                                 Open: 
@@ -128,6 +129,7 @@ const DataPanel = props => {
                 )}
             </div>
             {showSearch && <StockSearch onStockSelect={handleAddStock} savedStocks={data} loadDetailsView={loadDetailsView} onForceUpdate={props.needsUpdate} onShowSearch={handleResetShowSearch} />}
+            {showDetails && <DetailsView data={detailsData} onShowDetails={handleResetDetails} buyInPrice={props.userData} />}
                 </main>
 )};
 

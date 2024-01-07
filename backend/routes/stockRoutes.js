@@ -60,12 +60,24 @@ router.get('/:symbol', async (req, res) => {
     const symbol = req.params.symbol.toUpperCase();
     try {
       const currentDate = new Date();
-      const yesterday = new Date(currentDate);
-      yesterday.setDate(currentDate.getDate() - 1);
-      const formattedYesterday = yesterday.toISOString().split('T')[0];
+        let dateToFetchData = new Date(currentDate);
+
+        // Check if it's Sunday or Monday
+        if (currentDate.getDay() === 0) {
+            // Sunday, fetch data from Friday
+            dateToFetchData.setDate(currentDate.getDate() - 2);
+        } else if (currentDate.getDay() === 1) {
+            // Monday, fetch data from Friday
+            dateToFetchData.setDate(currentDate.getDate() - 3);
+        } else {
+            // Fetch data from yesterday for all other days
+            dateToFetchData.setDate(currentDate.getDate() - 1);
+        }
+
+        const formattedDate = dateToFetchData.toISOString().split('T')[0];
 
       // Fetch stock details
-      const stockResponse = await axios.get(`${baseURL}/open-close/${symbol}/${formattedYesterday}`, {
+      const stockResponse = await axios.get(`${baseURL}/open-close/${symbol}/${formattedDate}`, {
         params: {
           adjusted: true,
           apiKey: apiKey,

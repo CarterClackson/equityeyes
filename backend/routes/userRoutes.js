@@ -183,6 +183,7 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
     const userID = req.user.userId;
     const savedStockTicker = req.body.savedStock.ticker.toUpperCase();
     let savedStockPrice;
+    let stockData;
 
     try {
         const currentDate = new Date();
@@ -208,6 +209,7 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
                 apiKey: apiKey,
             }
         });
+        stockData = response.data;
         savedStockPrice = response.data.close;
     } catch (error) {
         console.error(error);
@@ -239,7 +241,7 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
         user.savedStocks.push({ ticker: savedStockTicker, buyInPrice: savedStockPrice });
         try {
             await user.save();
-            return res.status(200).json({ message: 'Saved stock to user.' })
+            return res.status(200).json({ symbol: savedStockTicker, buyInPrice: savedStockPrice, data: stockData })
         } catch (error) {
             console.log("Save error:", error.message);
             return res.status(500).json({ message: 'Something went wrong, could not save place to user.' });

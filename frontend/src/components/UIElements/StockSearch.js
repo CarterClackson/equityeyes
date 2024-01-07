@@ -45,7 +45,8 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 
   const isStockSaved = (stock) => savedStocks.some(savedStock => savedStock.symbol === stock.symbol);
 
-  const handleStockSelect = async (selectedStock) => {
+  const handleStockSelect = async (e, selectedStock) => {
+    e.stopPropagation();
     setIsLoading(true);
     onStockSelect(selectedStock);
     setSearchQuery('');
@@ -68,7 +69,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
             throw new Error('Network response not ok');
         }
         const data = await response.json();
-        onForceUpdate();
+        onForceUpdate(data);
         const handleResetShowSearch = onShowSearch();
         setIsLoading(false);
     } catch (error) {
@@ -89,7 +90,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
  
 
   return (
-    <div className="search-bar flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4">
+    <div className="relative search-bar flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4">
       <input
         type="text"
         placeholder="Search stocks..."
@@ -98,6 +99,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
         onChange={(e) => setSearchQuery(e.target.value)}
         className="text-black w-full px-4 py-3 mb-1 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
       />
+      <span className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3" onClick={() => onShowSearch()}><i class="fas fa-solid fa-x"></i></span>
       {isLoading && <LoadingSpinner asSearchOverlay loadText={'Fetching stocks...'} />}
       {searchQuery.trim() !== '' && (
         <ul className="mt-2 max-h-60 overflow-y-scroll overflow-x-clip">
@@ -108,7 +110,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
                   {boldSearchTerm(result.symbol, searchQuery)} - {boldSearchTerm(result.name, searchQuery)}
                 </div>
                 <button
-                  onClick={() => handleStockSelect(result)}
+                  onClick={(e) => handleStockSelect(e, result)}
                   className={`ml-4 px-3 py-1 rounded-full ${
                     isStockSaved(result)
                       ? 'bg-emerald-700 text-zinc-50 font-bold hover:bg-white hover:text-emerald-700 transition-all'

@@ -29,7 +29,7 @@ const Nav = () => {
   // Callback function to update isLoggedIn state
   const updateIsLoggedIn = () => {
     setIsLoggedIn(false);
-    window.location.href = '/';
+    window.location.href = '/login';
   };
 
   const authNavItems = [
@@ -45,11 +45,11 @@ const Nav = () => {
                 <img src={process.env.PUBLIC_URL + '/assets/images/equityEyes-Logo.png'} alt="equityEyes Logo" className="h-8 mr-2 inline" />
             </a>
         </div>
-        <ul className="flex items-center space-x-4">
+        <ul className="flex items-center">
             {isLoggedIn && (
                 authNavItems.map((item, index) => (
                     <li key={index}>
-                    <Link to={item.to} className="text-white font-medium hover:text-gray-300">
+                    <Link to={item.to} className="text-zinc-50 font-medium px-4 py-2 hover:text-gray-300 transition-all">
                         {item.label}
                     </Link>
                     </li>
@@ -59,15 +59,18 @@ const Nav = () => {
               <li>
                 <a 
                 href="" 
-                className="text-white font-medium hover:text-gray-300"
+                className="text-white font-medium px-4 py-2 hover:text-gray-300"
                 onClick={(e) => handleLogout(e, updateIsLoggedIn)}
                 >Logout</a>
               </li>
             }
             {!isLoggedIn && (
             <li>
-                <Link to="/login" className="text-white font-medium hover:text-gray-300">
+                <Link to="/login" className="text-zinc-50 font-medium px-4 py-2 hover:text-gray-300 transition-all">
                 Login
+                </Link>
+                <Link to="/" className="text-zinc-50 border-2 border-zinc-50 rounded-full ml-2 px-4 py-2 font-medium hover:text-emerald-900 hover:bg-zinc-50 hover:border-emerald-900 transition-all">
+                Signup
                 </Link>
             </li>
             )}

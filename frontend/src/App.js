@@ -40,7 +40,7 @@ const App = () => {
 
   // Show a loading spinner while the initial check is in progress
   if (!initialCheckComplete) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner asBlockingOverlay loadText='Loading your data...' />;
   }
 
   return (

@@ -97,11 +97,32 @@ const Dashboard = () => {
         }
     }, [needsUpdate]);
 
-    const handleForceUpdate = () => {
+    const handleForceUpdate = async (newStockData) => {
+        // Retrieve the existing data from local storage
+        const userId = await getUserId();
+        const cachedData = localStorage.getItem(`userData_${userId}`);
+    
+        if (cachedData) {
+            try {
+                // Parse the JSON data
+                const existingData = JSON.parse(cachedData);
+                
+                // Update the data by appending the new stock information to the array
+                existingData.push(newStockData);
+    
+                // Stringify the updated data
+                const updatedDataString = JSON.stringify(existingData);
+    
+                // Save the updated data back to local storage
+                localStorage.setItem(`userData_${userId}`, updatedDataString);
+                localStorage.setItem(`userDataTimestamp_${userId}`, Date.now().toString());
+            } catch (error) {
+                console.error('Error parsing or updating local storage data:', error);
+            }
+        }
+    
         setNeedsUpdate(prevState => !prevState);
-        localStorage.removeItem(`userData_${userID}`);
-        localStorage.removeItem(`userDataTimestamp_${userID}`);
-    }
+    };
 
     const handleDeleteUpdate = () => {
         setNeedsUpdate(prevState => !prevState);

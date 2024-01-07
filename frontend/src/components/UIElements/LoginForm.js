@@ -21,6 +21,10 @@ const LoginForm = props => {
     const [formSuccess, setFormSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    const handleOAuthLogin = async (provider) => {
+        window.location.href = `${backendUrl}auth/${provider}`;
+};
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ 
@@ -36,7 +40,60 @@ const LoginForm = props => {
         setFormSuccess('');
     }
 
-    const handleSubmit = async (e) => {
+    const handleSubmitLogin = async (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const errors = {};
+            if (!formData.email) {
+                errors.email = 'Please enter your email.';
+            }
+            if (!formData.password) {
+                errors.password = 'Please enter your password.';
+            }
+            if (Object.keys(errors).length > 0) {
+                // Set formErrors state to display errors beneath each field
+                setFormErrors(errors);
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                const response = await fetch(backendUrl + 'user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+                if (response.ok) {
+                    setFormData({ email: '', password: '' });
+                    setGeneralError('');
+                    const data = await response.json();
+    
+                    setAuthToken(data.token);
+    
+                    if (getAuthToken() !== null) {
+                        setTimeout(() => {
+                            navigate('/dashboard');
+                            setIsLoading(false);
+                        }, 1000);
+                    } else {
+                        setIsLoading(false);
+                        setGeneralError('Something went wrong, please refresh the page.')
+                    }
+                } else {
+                    const errorData = await response.json();
+                    setIsLoading(false);
+                    setGeneralError(errorData.error);
+                    console.error(errorData.error); // Handle errors
+                }
+            } catch (error) {
+                console.log('Error during signup: ' + error);
+            }
+    }
+
+    const handleSubmitSignup = async (e) => {
         e.preventDefault();
         setIsLoading(true);
 
@@ -104,18 +161,27 @@ const LoginForm = props => {
 
     return (
         <React.Fragment>
+            <div className="flex items-center">
+                    <div className="mr-8">
+                        <button onClick={() => handleOAuthLogin('google')} className="flex items-center group  bg-emerald-900 border-2 border-emerald-900 text-white font-bold py-2 px-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all">{ props.isSignup ? 'Sign up' : 'Login' } with <i className="fab fa-google text-white text-2xl ml-2 group-hover:text-emerald-900"></i></button>
+                    </div>
+                    <div className="">
+                        <button onClick={() => handleOAuthLogin('github')} className="flex items-center group bg-emerald-900 border-2 border-emerald-900 text-white font-bold py-2 px-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-700 hover:border-emerald-900 transition-all">{ props.isSignup ? 'Sign up' : 'Login' } with <i className="fab fa-github text-white text-2xl ml-2 group-hover:text-emerald-900"></i></button>
+                    </div>
+                </div>
+            <span className="text-white/90 py-4">-or-</span>
             {formSuccess && <div className="success">{formSuccess}</div>}
-            {generalError && <span className="form-error">{generalError}</span> }
-            {!formSuccess && (<form onSubmit={handleSubmit} className= 'relative flex flex-col items-center max-w-md xl:w-1/4 2xl:w-1/5 mx-auto'>
-                {isLoading && <LoadingSpinner asFormOverlay loadText={props.loadText} />}
-                    <input 
+            {generalError && <span className="form-error py-2 px-5 mt-2 bg-red-600 font-medium">{generalError}</span> }
+            {!formSuccess && (<form onSubmit={props.isSignup ? handleSubmitSignup : handleSubmitLogin } className= 'flex flex-col items-center max-w-md xl:w-1/4 2xl:w-1/5 mx-auto'>
+                {isLoading && <LoadingSpinner asOverlay loadText={props.loadText} />}
+                    {props.isSignup && (<input 
                         type="text" 
                         name="name" 
                         placeholder="Name" 
                         className="form-input text-black w-full px-4 py-3 mt-2 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
                         value={formData.name}
                         onChange={handleChange}
-                    />
+                    />)}
                     {formErrors.name && <div className="field-error py-2 px-5 mt-2 mb-4 bg-red-600 font-medium">{formErrors.name}</div>}
                     <input 
                         type="email" 
@@ -139,7 +205,7 @@ const LoginForm = props => {
                         type="submit" 
                         className="bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-1/3 py-3 px-4 mt-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
                     >
-                            Sign up
+                            { props.isSignup ? 'Sign up' : 'Login' }
                     </button>
             </form> )}
         </React.Fragment>
