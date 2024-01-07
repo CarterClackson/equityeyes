@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { useState } from 'react';
 
 import { getAuthToken } from '../utils/cookieUtils';
 
@@ -11,7 +10,6 @@ import "../styles/DataPanel.css";
 const DataPanel = props => {
     const data = props.userData;
     const errorResponse = props.errorResponse;
-    const setUserData = props.setUserData;
     const handleDeleteUpdate = props.deleteUpdate;
     const getUserId = props.getUserId;
 
