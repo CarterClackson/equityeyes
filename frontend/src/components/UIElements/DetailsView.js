@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+import StockChart from './Chart';
+
 const DetailsView = props => {
 
     const tickerData = props.data.ticker.results;
@@ -51,7 +53,7 @@ const DetailsView = props => {
             <span className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3" onClick={() => props.onShowDetails()}><i class="fas fa-solid fa-x"></i></span>
                 <h1 className="text-2xl font-bold"><a href={tickerData.homepage_url} rel="noreferrer" target="_blank" className="font-extrabold text-yellow-400">{tickerData.ticker}</a> - {tickerData.name}</h1>
                 <p className="leading-5">{renderDescription()}</p>
-                <div className="min-h-32 flex flex-col items-center justify-center">SPACE FOR GRAPHS :) </div>
+                <StockChart ticker={tickerData.ticker} />
                 <div className="flex">
                     <div className="flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2">
                         <h3 className="text-xl font-bold text-zinc-50 text-center">Daily High</h3>
