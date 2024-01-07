@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
 
 import Nav from '../components/Navigation';
 import LoginForm from '../components/UIElements/LoginForm';

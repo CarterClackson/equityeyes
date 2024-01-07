@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom/client';
 import { Link } from 'react-router-dom';
 
 import handleLogout from '../utils/logoutUtils';
 
-import { setAuthToken, getAuthToken, removeAuthToken } from '../utils/cookieUtils';
+import { getAuthToken } from '../utils/cookieUtils';
 
 import "../styles/Navigation.css";
 
 const Nav = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [initialCheckComplete, setInitialCheckComplete] = useState(false);
 
   useEffect(() => {
     // Check for the existence of the authentication token from the backend
@@ -21,9 +19,6 @@ const Nav = () => {
     } else {
       setIsLoggedIn(false);
     }
-
-    // Mark the initial check as complete
-    setInitialCheckComplete(true);
   }, []);
 
   // Callback function to update isLoggedIn state
@@ -57,11 +52,10 @@ const Nav = () => {
             )}
             {isLoggedIn && 
               <li>
-                <a 
-                href="" 
-                className="text-white font-medium px-4 py-2 hover:text-gray-300"
+                <button  
+                className="text-white font-medium px-4 py-2 hover:text-gray-300 transition-all"
                 onClick={(e) => handleLogout(e, updateIsLoggedIn)}
-                >Logout</a>
+                >Logout</button>
               </li>
             }
             {!isLoggedIn && (
