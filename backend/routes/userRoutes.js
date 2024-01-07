@@ -106,6 +106,25 @@ router.post('/login', async (req, res) => {
     return res.status(200).json({ message: 'Login successful', token });
 });
 
+router.post('/logout', verifyToken, async (req, res) => {
+    const userID = req.user.userId;
+
+    try {
+        const user = await User.findOne({
+            _id: userID,
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        res.clearCookie('authToken');
+        return res.status(200).json({ message: 'Logout successful' });
+
+    } catch (error) {
+        console.error('Error logging out', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 router.patch('/update/user-data', verifyToken, async (req, res) => {
     const userID = req.user.userId;
@@ -163,24 +182,36 @@ router.patch('/update/markets', verifyToken, async (req, res) => {
 router.post('/stocks/add', verifyToken, async (req, res) => {
     const userID = req.user.userId;
     const savedStockTicker = req.body.savedStock.ticker.toUpperCase();
-
+    let savedStockPrice;
 
     try {
         const currentDate = new Date();
-        const yesterday = new Date(currentDate);
-        yesterday.setDate(currentDate.getDate() - 1);
-        const formattedYesterday = yesterday.toISOString().split('T')[0];
+        let dateToFetchData = new Date(currentDate);
 
-        const response = await axios.get(`${baseURL}/open-close/${savedStockTicker}/${formattedYesterday}`, {
+        // Check if it's Sunday or Monday
+        if (currentDate.getDay() === 0) {
+            // Sunday, fetch data from Friday
+            dateToFetchData.setDate(currentDate.getDate() - 2);
+        } else if (currentDate.getDay() === 1) {
+            // Monday, fetch data from Friday
+            dateToFetchData.setDate(currentDate.getDate() - 3);
+        } else {
+            // Fetch data from yesterday for all other days
+            dateToFetchData.setDate(currentDate.getDate() - 1);
+        }
+
+        const formattedDate = dateToFetchData.toISOString().split('T')[0];
+
+        const response = await axios.get(`${baseURL}/open-close/${savedStockTicker}/${formattedDate}`, {
             params: {
-              adjusted: true,
-              apiKey: apiKey,
+                adjusted: true,
+                apiKey: apiKey,
             }
-          });
-          savedStockPrice = response.data.close;
+        });
+        savedStockPrice = response.data.close;
     } catch (error) {
-    console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 
     let user;
@@ -195,9 +226,11 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: 'Something went wrong, could not update user.' });
     }
-    if(user.savedStocks.length >= 5) {
+
+    if (user.savedStocks.length >= 5) {
         return res.status(429).json({ message: 'Due to API limitations, you can only add 5 saved stocks at a time.' });
     }
+
     const existingStock = user.savedStocks.find(stock => stock.ticker === savedStockTicker);
 
     if (existingStock) {
@@ -208,7 +241,7 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
             await user.save();
             return res.status(200).json({ message: 'Saved stock to user.' })
         } catch (error) {
-            console.log("Save error:", error.message );
+            console.log("Save error:", error.message);
             return res.status(500).json({ message: 'Something went wrong, could not save place to user.' });
         }
     }
@@ -249,38 +282,61 @@ router.get('/stocks', verifyToken, async (req, res) => {
     const userID = req.user.userId;
 
     let user;
-  
-    try {
-      user = await User.findOne({ _id: userID });
-  
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-  
-      const savedStocks = user.savedStocks;
-      if (savedStocks && savedStocks.length > 0) {
-        const currentDate = new Date();
-        const yesterday = new Date(currentDate);
-        yesterday.setDate(currentDate.getDate() - 1);
-        const formattedYesterday = yesterday.toISOString().split('T')[0];
 
-        const stockDataPromises = savedStocks.map(async stock => {
-            const response = await axios.get(`${baseURL}/open-close/${stock.ticker}/${formattedYesterday}`, {
-              params: {
-                adjusted: true,
-                apiKey: apiKey,
-              }
+    try {
+        user = await User.findOne({ _id: userID });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const savedStocks = user.savedStocks;
+        if (savedStocks && savedStocks.length > 0) {
+            const currentDate = new Date();
+            let dateToFetchData = new Date(currentDate);
+
+            // Check if it's Sunday or Monday
+            if (currentDate.getDay() === 0) {
+                // Sunday, fetch data from Friday
+                dateToFetchData.setDate(currentDate.getDate() - 2);
+            } else if (currentDate.getDay() === 1) {
+                // Monday, fetch data from Friday
+                dateToFetchData.setDate(currentDate.getDate() - 3);
+            } else {
+                // Fetch data from yesterday for all other days
+                dateToFetchData.setDate(currentDate.getDate() - 1);
+            }
+
+            const formattedDate = dateToFetchData.toISOString().split('T')[0];
+
+            const stockDataPromises = savedStocks.map(async stock => {
+                const response = await axios.get(`${baseURL}/open-close/${stock.ticker}/${formattedDate}`, {
+                    params: {
+                        adjusted: true,
+                        apiKey: apiKey,
+                    }
+                });
+                return { symbol: stock.ticker, buyInPrice: stock.buyInPrice, data: response.data };
             });
-            return { symbol: stock.ticker, buyInPrice: stock.buyInPrice, data: response.data };
-          });
-          const stockData = await Promise.all(stockDataPromises);
-          return res.status(201).json(stockData);
-      }
-      return res.status(204).json({ message: 'User has no saved stocks.' }); 
+            const stockData = await Promise.all(stockDataPromises);
+            return res.status(201).json(stockData);
+        }
+        return res.status(204).json({ message: 'User has no saved stocks.' });
     } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
+        if (error.response && error.response.status === 429) {
+            return res.status(429).json({ message: 'Polygon API limit exceeded. Wait a minute and try again.' });
+        }
+        console.error(error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+router.get('/id', verifyToken, async (req, res) => {
+    const userID = req.user.userId;
+    if (!userID) {
+        return res.status(404).json({ error: 'User not found' });
+    }
+    return res.status(201).json(userID);
 });
 
 module.exports = router;

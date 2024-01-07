@@ -5,43 +5,56 @@ import { setAuthToken, getAuthToken } from '../src/utils/cookieUtils';
 import './App.css';
 
 import HomePage from './pages/Home';
-import AuthData from './pages/Dashboard';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import LoadingSpinner from './components/UIElements/LoadingSpinner';
 
 const App = () => {
-
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [initialCheckComplete, setInitialCheckComplete] = useState(false);
 
-
   useEffect(() => {
-    // Check for the existence of the authentication token from the backend
-    const userToken = getAuthToken();
+    const checkAuthentication = async () => {
+      try {
+        // Check for the existence of the authentication token from the backend
+        const userToken = await getAuthToken();
 
-    if (userToken) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
+        if (userToken) {
+          setIsLoggedIn(true);
+        } else {
+          setIsLoggedIn(false);
+        }
 
-    // Mark the initial check as complete
-    setInitialCheckComplete(true);
+        // Mark the initial check as complete
+        setInitialCheckComplete(true);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+        // Handle errors if needed
+        setIsLoggedIn(false);
+        setInitialCheckComplete(true);
+      }
+    };
+
+    checkAuthentication();
   }, []);
+
+  // Show a loading spinner while the initial check is in progress
+  if (!initialCheckComplete) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} ></Route>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
         <Route
           path="/dashboard"
-          element={isLoggedIn ? <Dashboard /> : <Login />}
+          element={<Dashboard />}
         />
       </Routes>
     </Router>
   );
-}
+};
 
 export default App;

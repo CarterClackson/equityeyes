@@ -14,8 +14,6 @@ const { restart } = require('nodemon');
 const handleTokenGeneration = (req, res, user) => {
     const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '7d' });
 
-    console.log(token); // Log the token (optional)
-    //res.status(200).json({ message: 'Login successful', token });
     res.cookie('authToken', token, { 
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });

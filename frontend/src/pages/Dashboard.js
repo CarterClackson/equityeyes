@@ -3,28 +3,58 @@ import ReactDOM from 'react-dom/client';
 
 import DataPanel from '../components/DataPanel';
 import Nav from '../components/Navigation';
+import LoadingSpinner from '../components/UIElements/LoadingSpinner';
+
 import { getAuthToken } from '../utils/cookieUtils';
 
 const Dashboard = () => {
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(false);
+    //User states
+    const [userData, setUserData] = useState([]);
+    const [userID, setUserID] = useState('');
 
+    // Render states
+    const [isLoading, setIsLoading] = useState(false);
+    const [needsUpdate, setNeedsUpdate] = useState(false);
+
+    //Error states
+    const [errorResponse, setErrorResponse] = useState('');
+
+    const getUserId = async () => {
+        try {
+            const response = await fetch(process.env.REACT_APP_BACKEND_URL + 'user/id', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${getAuthToken()}`
+                },
+            });
+            if (response.ok) {
+                const userId = await response.json();
+                setUserID(userId);
+                return userId;
+            }
+        } catch (error) {
+            console.error('Error getting user ID from backend:', error);
+        }
+        return null;
+    };
 
     useEffect(() => {
         // Check if function is already running
-        if (!loading) {
+        if (!isLoading) {
         const fetchData = async () => {
-            setLoading(true);
+            setIsLoading(true);
             try {
                 // Check for cached data and data age(>6hr) before running fetch for new data.
-                const cachedData = localStorage.getItem('userData');
-                const cachedTimestamp = localStorage.getItem('userDataTimestamp');
+                const userId = await getUserId();
+                const cachedData = localStorage.getItem(`userData_${userId}`);
+                const cachedTimestamp = localStorage.getItem(`userDataTimestamp_${userId}`);
                 const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 6 * 60 * 60 * 1000;
                 
                 // If data exists, pull it from storage.
                 if (isDataValid && cachedData) {
                     setUserData(JSON.parse(cachedData));
-                    setLoading(false);
+                    setIsLoading(false);
                 } else {
                     const response = await fetch(process.env.REACT_APP_BACKEND_URL + 'user/stocks', {
                     method: 'GET',
@@ -34,52 +64,66 @@ const Dashboard = () => {
                     },
                     });
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        //Check if user has made more than 5 requests in the last minute. Polygon Free Limit
+                        if (response.status === 429) {
+                            setErrorResponse('External API limit reached, please wait a moment and try again.')
+                            setIsLoading(false); 
+                            return;
+                        }
+                    }
+                    if (response.status === 204) {
+                        setIsLoading(false); 
+                        return;
                     }
         
                     const data = await response.json();
-
-                    // Cache the fetched data and timestamp
-                    localStorage.setItem('userData', JSON.stringify(data));
-                    localStorage.setItem('userDataTimestamp', Date.now().toString());
-
-                    setUserData(data);
-                    setLoading(false);
+                    if (response.status === 201) {
+                        // Cache the fetched data and timestamp
+                        localStorage.setItem(`userData_${userId}`, JSON.stringify(data));
+                        localStorage.setItem(`userDataTimestamp_${userId}`, Date.now().toString());
+                        setUserData(data);
+                    }
+                    setIsLoading(false);
                 }
             } catch (error) {
                 console.log('Fetch error:', error);
             } finally {
-                setLoading(false); // Set loading to false regardless of success or failure
+                setIsLoading(false); // Set isLoading to false regardless of success or failure
               }
             };
     
             // Call the async function
             fetchData();
         }
-    }, []);
+    }, [needsUpdate]);
+
+    const handleForceUpdate = () => {
+        setNeedsUpdate(prevState => !prevState);
+        localStorage.removeItem(`userData_${userID}`);
+        localStorage.removeItem(`userDataTimestamp_${userID}`);
+    }
+
+    const handleDeleteUpdate = () => {
+        setNeedsUpdate(prevState => !prevState);
+    }
+
+    const handleIsLoading = (state) => {
+        setIsLoading(state);
+    }
+
     return (
         <React.Fragment>
-            <h1>{getAuthToken()}</h1>
             <Nav />
-            <DataPanel />
-
-            {userData && (
-                <div>
-                <h2>User Stocks:</h2>
-                {userData.map((stock, index) => (
-                    <div key={index}>
-                    <p>Symbol: {stock.symbol}</p>
-                    <p>Buy-in Price: {stock.buyInPrice}</p>
-                    <p>Data:</p>
-                    <ul>
-                        <li>Open: {stock.data.open}</li>
-                        <li>High: {stock.data.high}</li>
-                        <li>Low: {stock.data.low}</li>
-                    </ul>
-                    </div>
-                ))}
-                </div>
-      )}
+            {isLoading && <LoadingSpinner asOverlay loadText={'Fetching data...'} />}
+            <DataPanel 
+                userData={userData} 
+                userID={userID} 
+                deleteUpdate={handleDeleteUpdate} 
+                needsUpdate={handleForceUpdate} 
+                errorResponse={errorResponse} 
+                isLoading={handleIsLoading}
+                setUserData={setUserData}
+                getUserId={getUserId} />
         </React.Fragment>
     );
 };

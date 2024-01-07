@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const socialSchema = new Schema({
     provider: { type: String, required: true },
-    socialId: { type: String, required: false, unique: true },
+    socialId: { type: String, required: false, unique: true, sparse: true },
   });
 
 const userSchema = new Schema({

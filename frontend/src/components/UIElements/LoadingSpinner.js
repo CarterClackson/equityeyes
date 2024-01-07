@@ -6,15 +6,24 @@ const LoadingSpinner = props => {
   return (
     <React.Fragment>
       {props.asOverlay ? (
-        <div className="loading-spinner__overlay">
+        <div className="loading-spinner__overlay flex-col">
           <div className="lds-dual-ring"></div>
+          <span className="text-white font-semibold">{`${props.loadText}`}</span>
         </div>
-      ) : props.asFormOverlay ? ( // Corrected typo from "asFormOverLay" to "asFormOverlay"
-        <div className="form-overlay">
-          <div className={`${props.FormOverlay && 'loading-spinner__formOverlay'}`}>
+      ) : props.asFormOverlay ? (
+        <div className="form-overlay flex-col">
+          <div className={`${props.FormOverlay && 'loading-spinner__formOverlay'} flex flex-col justify-center items-center`}>
             <div className="lds-dual-ring"></div>
+            <span className="text-emerald-900 font-semibold">{`${props.loadText}`}</span>
           </div>
         </div>
+      ) : props.asSearchOverlay ? (
+      <div className="search-overlay flex-col">
+        <div className={`${props.FormOverlay && 'loading-spinner__formOverlay'} flex flex-col justify-center items-center`}>
+          <div className="lds-dual-ring"></div>
+          <span className="text-white font-semibold">{`${props.loadText}`}</span>
+        </div>
+      </div>  
       ) : (
         <div className="lds-dual-ring"></div>
       )}
