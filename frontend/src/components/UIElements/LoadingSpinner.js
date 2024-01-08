@@ -25,7 +25,7 @@ const LoadingSpinner = props => {
         </div>
       </div>  
       ) : props.asBlockingOverlay ? (
-        <div className="blocking-overlay flex-col relative z-10">
+        <div className="blocking-overlay flex-col relative w-full h-full items-center justify-center z-20">
           <div className={`${props.FormOverlay && 'loading-spinner__formOverlay'} flex flex-col justify-center items-center`}>
             <div className="lds-dual-ring"></div>
             <span className="text-white font-semibold">{`${props.loadText}`}</span>
