@@ -135,7 +135,7 @@ const Dashboard = () => {
     return (
         <React.Fragment>
             <Nav />
-            {isLoading && <LoadingSpinner asOverlay loadText={'Fetching data...'} />}
+            {isLoading && <LoadingSpinner asBlockingOverlay loadText={'Fetching data...'} />}
             <DataPanel 
                 userData={userData} 
                 userID={userID} 
