@@ -11,7 +11,6 @@ const StockChart = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({ symbol: '' });
   const [compareData, setCompareData] = useState([]);
-  let stockData;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,7 +27,7 @@ const StockChart = (props) => {
   
       if (isDataValid && cachedData) {
         const compareData = JSON.parse(cachedData);
-        setCompareData(compareData); // Update the state immediately
+        setCompareData(compareData);
       } else {
         const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${formData.symbol}/history`, {
           method: 'GET',
@@ -51,7 +50,6 @@ const StockChart = (props) => {
   
         localStorage.setItem(`stock_history_${formData.symbol.toUpperCase()}`, JSON.stringify(compareData));
         localStorage.setItem(`stock_history_${formData.symbol.toUpperCase()}_DateTimestamp`, Date.now().toString());
-
         setCompareData(compareData);
       }
     } catch (error) {
@@ -61,12 +59,12 @@ const StockChart = (props) => {
     }
   };
   
-  // Use useEffect to trigger chart creation when compareData changes
   useEffect(() => {
-    createStockChart(compareData);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [compareData]);
-  
+    // Only render the chart when both datasets are available
+    if (compareData.length > 0) {
+      createStockChart(compareData);
+    }
+  }, [compareData, props.ticker]);
   
 
   const createStockChart = (data) => {
@@ -101,8 +99,7 @@ const StockChart = (props) => {
         pointHoverRadius: 0,
       },
     ];
-
-    if (compareData.length > 0) {
+    if (formData.symbol) {
       datasets.push({
         label: formData.symbol.toUpperCase(),
         data: data,
@@ -145,6 +142,7 @@ const StockChart = (props) => {
         },
       },
     });
+    setFormData({ symbol: '' });
   };
 
   const getStockData = (ticker) => {
@@ -169,8 +167,7 @@ const StockChart = (props) => {
         const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
 
         if (isDataValid && cachedData) {
-          // eslint-disable-next-line react-hooks/exhaustive-deps
-          stockData = JSON.parse(cachedData);
+          const stockData = JSON.parse(cachedData);
           setIsLoading(false);
           createStockChart(stockData);
         } else {
@@ -182,21 +179,26 @@ const StockChart = (props) => {
           });
 
           if (!response.ok) {
+            if (response.status === 500) {
+              console.log(response);
+              setTimeout(() => {
+                fetchData();
+              }, 60 * 1000);
+            }
             console.log(response);
-            setIsLoading(false);
-            return;
           }
+          else {
+            const data = await response.json();
+            const stockData = data.results.map((result) => ({
+              x: moment(result.t),
+              y: result.c,
+            }));
 
-          const data = await response.json();
-          const stockData = data.results.map((result) => ({
-            x: moment(result.t),
-            y: result.c,
-          }));
-
-          setIsLoading(false);
-          createStockChart(stockData);
-          localStorage.setItem(`stock_history_${props.ticker}`, JSON.stringify(stockData));
-          localStorage.setItem(`stock_history_${props.ticker}_DateTimestamp`, Date.now().toString());
+            localStorage.setItem(`stock_history_${props.ticker}`, JSON.stringify(stockData));
+            localStorage.setItem(`stock_history_${props.ticker}_DateTimestamp`, Date.now().toString());
+            createStockChart(stockData);
+            setIsLoading(false);
+          }
         }
       } catch (error) {
         console.error('Error loading stock data:', error);
@@ -205,7 +207,6 @@ const StockChart = (props) => {
     };
 
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.ticker]);
 
   return (
@@ -217,14 +218,14 @@ const StockChart = (props) => {
             type="text"
             placeholder="Symbol to compare"
             name="symbol"
-            className="form-input text-xs text-black w-full px-4 py-2 mt-2 border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
+            className="form-input text-xs text-black w-2/3 px-4 py-2 mt-2 ml-48 border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
             value={formData.symbol}
             onChange={handleChange}
           />
           <button
             type="submit"
             onClick={handleSubmit}
-            className="absolute right-0 bg-emerald-900 border-2 border-emerald-900 text-white text-xs font-bold w-1/3 py-2 px-4 mt-2 rounded-full focus:border-transparent focus:ring-1 focus:ring-emerald-900 hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+            className="absolute right-0 bg-emerald-900 border-2 border-emerald-900 text-white text-xs font-bold w-1/4 py-2 px-4 mt-2 rounded-full focus:border-transparent focus:ring-1 focus:ring-emerald-900 hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
           >
             Compare
           </button>
