@@ -169,6 +169,7 @@ const StockChart = (props) => {
         const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
 
         if (isDataValid && cachedData) {
+          // eslint-disable-next-line react-hooks/exhaustive-deps
           stockData = JSON.parse(cachedData);
           setIsLoading(false);
           createStockChart(stockData);
