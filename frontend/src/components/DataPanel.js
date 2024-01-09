@@ -70,7 +70,6 @@ const DataPanel = props => {
 
     const loadDetailsView = async (stockTicker) => {
         setIsLoading(true);
-        console.log('1');
         try {
             const cachedData = localStorage.getItem(`stock_details_${stockTicker}`);
             const cachedTimestamp = localStorage.getItem(`stock_details_${stockTicker}_DateTimestamp`);
@@ -82,7 +81,6 @@ const DataPanel = props => {
                 setShowDetails(true);
                 setIsLoading(false);
             } else {
-                console.log('3');
                 const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${stockTicker}`, {
                     method: 'GET',
                     headers: {
@@ -91,7 +89,15 @@ const DataPanel = props => {
                 });
                     
                 if (!response.ok) {
-                    console.log(response);
+                    if (response.status === 500) {
+                        console.log(response);
+                        setTimeout(() => {
+                          console.log('secondary');
+                          loadDetailsView(stockTicker);
+                        }, 60 * 1000);
+                      } else {
+                        console.log(response);
+                      }
                 }
 
                 if (response.status === 200) {
@@ -100,6 +106,7 @@ const DataPanel = props => {
                     setDetailsData(details);
                     localStorage.setItem(`stock_details_${stockTicker}`, JSON.stringify(details));
                     localStorage.setItem(`stock_details_${stockTicker}_DateTimestamp`, Date.now().toString());
+                    setIsLoading(false);
                     }
             }
         } catch (error) {
@@ -108,7 +115,7 @@ const DataPanel = props => {
                 loadDetailsView(stockTicker);
             }, 60 * 1000);
         } finally {
-            setIsLoading(false);
+            //setIsLoading(false);
         }
     }
     

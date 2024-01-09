@@ -17,6 +17,9 @@ const Dashboard = () => {
 
     //Error states
     const [errorResponse, setErrorResponse] = useState('');
+    
+    //Loader states
+    const [loadText, setLoadText] = useState('Fetching data');
 
     const getUserId = async () => {
         try {
@@ -65,12 +68,15 @@ const Dashboard = () => {
                     if (!response.ok) {
                         //Check if user has made more than 5 requests in the last minute. Polygon Free Limit
                         if (response.status === 429) {
-                            setErrorResponse('External API limit reached, please wait a moment and try again.')
-                            setIsLoading(false); 
-                            return;
+                            setErrorResponse('');
+                            setLoadText(loadText + ', this may take up to a minute...');
+                            setTimeout(() => {
+                                fetchData();
+                            }, 60 * 1000);
                         }
                     }
                     if (response.status === 204) {
+                        setErrorResponse('');
                         setIsLoading(false); 
                         return;
                     }
@@ -81,13 +87,13 @@ const Dashboard = () => {
                         localStorage.setItem(`userData_${userId}`, JSON.stringify(data));
                         localStorage.setItem(`userDataTimestamp_${userId}`, Date.now().toString());
                         setUserData(data);
+                        setIsLoading(false);
                     }
-                    setIsLoading(false);
                 }
             } catch (error) {
                 console.log('Fetch error:', error);
             } finally {
-                setIsLoading(false); // Set isLoading to false regardless of success or failure
+                //setIsLoading(false); // Set isLoading to false regardless of success or failure
               }
             };
     
@@ -135,7 +141,7 @@ const Dashboard = () => {
     return (
         <React.Fragment>
             <Nav />
-            {isLoading && <LoadingSpinner asBlockingOverlay loadText={'Fetching data...'} />}
+            {isLoading && <LoadingSpinner asBlockingOverlay loadText={loadText} />}
             <DataPanel 
                 userData={userData} 
                 userID={userID} 
