@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom/client';
 
 import DataPanel from '../components/DataPanel';
 import Nav from '../components/Navigation';
@@ -95,6 +94,7 @@ const Dashboard = () => {
             // Call the async function
             fetchData();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [needsUpdate]);
 
     const handleForceUpdate = async (newStockData) => {
@@ -135,7 +135,7 @@ const Dashboard = () => {
     return (
         <React.Fragment>
             <Nav />
-            {isLoading && <LoadingSpinner asOverlay loadText={'Fetching data...'} />}
+            {isLoading && <LoadingSpinner asBlockingOverlay loadText={'Fetching data...'} />}
             <DataPanel 
                 userData={userData} 
                 userID={userID} 

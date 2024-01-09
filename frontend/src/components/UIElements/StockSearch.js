@@ -49,6 +49,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
     e.stopPropagation();
     setIsLoading(true);
     onStockSelect(selectedStock);
+    onShowSearch();
     setSearchQuery('');
 
     try {
@@ -70,7 +71,6 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
         }
         const data = await response.json();
         onForceUpdate(data);
-        const handleResetShowSearch = onShowSearch();
         setIsLoading(false);
     } catch (error) {
         console.log(error);

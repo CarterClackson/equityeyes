@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom/client';
+import React, { useState } from 'react';
 
 import { getAuthToken } from '../utils/cookieUtils';
 
 import StockSearch from './UIElements/StockSearch';
 import DetailsView from './UIElements/DetailsView';
 
+import LoadingSpinner from './UIElements/LoadingSpinner';
+
 import "../styles/DataPanel.css";
 
 const DataPanel = props => {
     const data = props.userData;
     const errorResponse = props.errorResponse;
-    const setUserData = props.setUserData;
     const handleDeleteUpdate = props.deleteUpdate;
     const getUserId = props.getUserId;
 
     const [showSearch, setShowSearch] = useState(false);
     const [showDetails, setShowDetails] = useState(false);
     const [detailsData, setDetailsData] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
 
     const arrowColor = (currentPrice, buyInPrice) => {
         return currentPrice > buyInPrice ? 'text-green-500' : 'text-red-500'
@@ -68,23 +69,46 @@ const DataPanel = props => {
     }
 
     const loadDetailsView = async (stockTicker) => {
+        setIsLoading(true);
+        console.log('1');
         try {
-            const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${stockTicker}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+            const cachedData = localStorage.getItem(`stock_details_${stockTicker}`);
+            const cachedTimestamp = localStorage.getItem(`stock_details_${stockTicker}_DateTimestamp`);
+            const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
+    
+            // If data exists, pull it from storage.
+            if (isDataValid && cachedData) {
+                setDetailsData(JSON.parse(cachedData));
+                setShowDetails(true);
+                setIsLoading(false);
+            } else {
+                console.log('3');
+                const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${stockTicker}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 });
-                
+                    
                 if (!response.ok) {
                     console.log(response);
                 }
 
-                const detailsData = await response.json();
-                setShowDetails(true);
-                setDetailsData(detailsData)
+                if (response.status === 200) {
+                    const details = await response.json();
+                    setShowDetails(true);
+                    setDetailsData(details);
+                    localStorage.setItem(`stock_details_${stockTicker}`, JSON.stringify(details));
+                    localStorage.setItem(`stock_details_${stockTicker}_DateTimestamp`, Date.now().toString());
+                    }
+            }
         } catch (error) {
             console.log(error);
+            setTimeout(() => {
+                loadDetailsView(stockTicker);
+            }, 60 * 1000);
+        } finally {
+            setIsLoading(false);
         }
     }
     
@@ -129,6 +153,7 @@ const DataPanel = props => {
                 )}
             </div>
             {showSearch && <StockSearch onStockSelect={handleAddStock} savedStocks={data} loadDetailsView={loadDetailsView} onForceUpdate={props.needsUpdate} onShowSearch={handleResetShowSearch} />}
+            {isLoading && <LoadingSpinner asFormOverlay loadText='Fetching stock details, this may take a minute..'/>}
             {showDetails && <DetailsView data={detailsData} onShowDetails={handleResetDetails} buyInPrice={props.userData} />}
                 </main>
 )};

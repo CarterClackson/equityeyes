@@ -65,16 +65,17 @@ router.get('/:symbol', async (req, res) => {
         // Check if it's Sunday or Monday
         if (currentDate.getDay() === 0) {
             // Sunday, fetch data from Friday
-            dateToFetchData.setDate(currentDate.getDate() - 2);
+            dateToFetchData.setDate(currentDate.getDate() - 3);
         } else if (currentDate.getDay() === 1) {
             // Monday, fetch data from Friday
-            dateToFetchData.setDate(currentDate.getDate() - 3);
+            dateToFetchData.setDate(currentDate.getDate() - 4);
         } else {
             // Fetch data from yesterday for all other days
             dateToFetchData.setDate(currentDate.getDate() - 1);
         }
 
         const formattedDate = dateToFetchData.toISOString().split('T')[0];
+        console.log(formattedDate);
 
       // Fetch stock details
       const stockResponse = await axios.get(`${baseURL}/open-close/${symbol}/${formattedDate}`, {
