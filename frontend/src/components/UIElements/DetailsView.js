@@ -50,7 +50,7 @@ const DetailsView = props => {
     return (
         <React.Fragment>
             <div className="relative flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4">
-            <span className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3" onClick={() => props.onShowDetails()}><i class="fas fa-solid fa-x"></i></span>
+            <span className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3 cursor-pointer" onClick={() => props.onShowDetails()}><i class="fas fa-solid fa-x"></i></span>
                 <h1 className="text-2xl font-bold"><a href={tickerData.homepage_url} rel="noreferrer" target="_blank" className="font-extrabold text-yellow-400">{tickerData.ticker}</a> - {tickerData.name}</h1>
                 <p className="leading-5">{renderDescription()}</p>
                 <StockChart ticker={tickerData.ticker} />

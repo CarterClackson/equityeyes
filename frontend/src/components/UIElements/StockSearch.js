@@ -49,6 +49,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
     e.stopPropagation();
     setIsLoading(true);
     onStockSelect(selectedStock);
+    onShowSearch();
     setSearchQuery('');
 
     try {

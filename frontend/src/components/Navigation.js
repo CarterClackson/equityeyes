@@ -34,7 +34,7 @@ const Nav = () => {
   ];
 
     return (
-        <nav className="fixed w-full z-10 top-0 bg-gradient-to-bl from-emerald-950 to-emerald-800 drop-shadow-md p-4 flex justify-between items-center shadow-md">
+        <nav className="fixed w-full z-20 top-0 bg-gradient-to-bl from-emerald-950 to-emerald-800 drop-shadow-md p-4 flex justify-between items-center shadow-md">
         <div className="text-white font-bold text-lg">
             <a href="/">
                 <img src={process.env.PUBLIC_URL + '/assets/images/equityEyes-Logo.png'} alt="equityEyes Logo" className="h-8 mr-2 inline" />
