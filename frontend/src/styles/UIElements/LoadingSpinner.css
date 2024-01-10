@@ -1,64 +1,63 @@
 .lds-dual-ring {
-      display: inline-block;
-      width: auto;
-      height: auto;
-  }
-    
-  .lds-dual-ring:after {
-      content: ' ';
-      display: block;
-      width: 46px;
-      height: 46px;
-      margin: 1px;
-      border-radius: 50%;
-      border: 5px solid #ebcb64;
-      border-color: #ebcb64 transparent #ebcb64 transparent;
-      animation: lds-dual-ring 1.2s linear infinite;
-  }
-    
-  .loading-spinner__overlay {
-      height: 100%;
-      width: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      background: rgba(0, 0, 0, 0.75);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-  }
+	display: inline-block;
+	width: auto;
+	height: auto;
+}
 
-  .search-overlay {
-    background-color: rgba(0,0,0,0.8);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 10;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.lds-dual-ring:after {
+	content: " ";
+	display: block;
+	width: 46px;
+	height: 46px;
+	margin: 1px;
+	border-radius: 50%;
+	border: 5px solid #ebcb64;
+	border-color: #ebcb64 transparent #ebcb64 transparent;
+	animation: lds-dual-ring 1.2s linear infinite;
+}
+
+.loading-spinner__overlay {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: rgba(0, 0, 0, 0.75);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.search-overlay {
+	background-color: rgba(0, 0, 0, 0.8);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 10;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
 .blocking-overlay {
-  background-color: rgba(0,0,0,1);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 20;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+	background-color: rgba(0, 0, 0, 1);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 20;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 }
-    
-  @keyframes lds-dual-ring {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-  }
-  
+
+@keyframes lds-dual-ring {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}

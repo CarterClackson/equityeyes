@@ -6,234 +6,242 @@ import 'chartjs-adapter-moment';
 import LoadingSpinner from './LoadingSpinner';
 
 const StockChart = (props) => {
-  const chartRef = useRef(null);
-  const chartInstance = useRef(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [formData, setFormData] = useState({ symbol: '' });
-  const [compareData, setCompareData] = useState([]);
+	const chartRef = useRef(null);
+	const chartInstance = useRef(null);
+	const [isLoading, setIsLoading] = useState(false);
+	const [formData, setFormData] = useState({ symbol: '' });
+	const [compareData, setCompareData] = useState([]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+	const handleChange = (e) => {
+		const { name, value } = e.target;
+		setFormData({ ...formData, [name]: value });
+	};
 
-  const handleSubmit = async () => {
-    setIsLoading(true);
-  
-    try {
-      const cachedData = localStorage.getItem(`stock_history_${formData.symbol.toUpperCase()}`);
-      const cachedTimestamp = localStorage.getItem(`stock_history_${formData.symbol.toUpperCase()}_DateTimestamp`);
-      const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
-  
-      if (isDataValid && cachedData) {
-        const compareData = JSON.parse(cachedData);
-        setCompareData(compareData);
-      } else {
-        const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${formData.symbol}/history`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-  
-        if (!response.ok) {
-          console.log(response);
-          setIsLoading(false);
-          return;
-        }
-  
-        const newCompareDetails = await response.json();
-        const compareData = newCompareDetails.results.map((result) => ({
-          x: moment(result.t),
-          y: result.c,
-        }));
-  
-        localStorage.setItem(`stock_history_${formData.symbol.toUpperCase()}`, JSON.stringify(compareData));
-        localStorage.setItem(`stock_history_${formData.symbol.toUpperCase()}_DateTimestamp`, Date.now().toString());
-        setCompareData(compareData);
-      }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  useEffect(() => {
-    // Only render the chart when both datasets are available
-    if (compareData.length > 0) {
-      createStockChart(compareData);
-    }
-  }, [compareData, props.ticker]);
-  
+	const handleSubmit = async () => {
+		setIsLoading(true);
 
-  const createStockChart = (data) => {
-    const ctx = chartRef.current.getContext('2d');
+		try {
+			const cachedData = localStorage.getItem(`stock_history_${formData.symbol.toUpperCase()}`);
+			const cachedTimestamp = localStorage.getItem(`stock_history_${formData.symbol.toUpperCase()}_DateTimestamp`);
+			const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
 
-    if (chartInstance.current) {
-      chartInstance.current.destroy();
-    }
+			if (isDataValid && cachedData) {
+				const compareData = JSON.parse(cachedData);
+				setCompareData(compareData);
+			} else {
+				const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${formData.symbol}/history`, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
 
-    const stockData = getStockData(props.ticker);
+				if (!response.ok) {
+					console.log(response);
+					setIsLoading(false);
+					return;
+				}
 
-    const yMax = Math.max(
-      Math.max(...stockData.map((point) => point.y)),
-      ...(data.length > 0 ? [Math.max(...data.map((point) => point.y))] : [])
-    );
+				const newCompareDetails = await response.json();
+				const compareData = newCompareDetails.results.map((result) => ({
+					x: moment(result.t),
+					y: result.c,
+				}));
 
-    const yMin = Math.min(
-      Math.min(...stockData.map((point) => point.y)),
-      ...(data.length > 0 ? [Math.min(...data.map((point) => point.y))] : [])
-    );
+				localStorage.setItem(`stock_history_${formData.symbol.toUpperCase()}`, JSON.stringify(compareData));
+				localStorage.setItem(`stock_history_${formData.symbol.toUpperCase()}_DateTimestamp`, Date.now().toString());
+				setCompareData(compareData);
+			}
+		} catch (error) {
+			console.log(error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
-    const yRange = yMax - yMin;
-    const yPadding = 0.1; // You can adjust this padding as needed
+	useEffect(() => {
+		// Only render the chart when both datasets are available
+		if (compareData.length > 0) {
+			createStockChart(compareData);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [compareData, props.ticker]);
 
-    const datasets = [
-      {
-        label: props.ticker,
-        data: stockData,
-        borderColor: 'rgb(250 204 21)',
-        fill: true,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-      },
-    ];
-    if (formData.symbol) {
-      datasets.push({
-        label: formData.symbol.toUpperCase(),
-        data: data,
-        borderColor: 'rgba(255,255,255)',
-        fill: true,
-        pointRadius: 0,
-        pointHoverRadius: 0,
-      });
-    }
+	const createStockChart = (data) => {
+		const ctx = chartRef.current.getContext('2d');
 
-    chartInstance.current = new Chart(ctx, {
-      type: 'line',
-      data: {
-        datasets: datasets,
-      },
-      options: {
-        scales: {
-          x: {
-            type: 'time',
-            time: {
-              unit: 'day',
-            },
-            title: {
-              display: true,
-              text: 'Date',
-            },
-          },
-          y: {
-            title: {
-              display: true,
-              text: 'Stock Price',
-            },
-            suggestedMin: yMin - yRange * yPadding,
-            suggestedMax: yMax + yRange * yPadding,
-          },
-        },
-        animation: {
-          duration: 1000,
-          easing: 'easeInOutQuart',
-        },
-      },
-    });
-    setFormData({ symbol: '' });
-  };
+		if (chartInstance.current) {
+			chartInstance.current.destroy();
+		}
 
-  const getStockData = (ticker) => {
-    const cachedData = localStorage.getItem(`stock_history_${ticker}`);
-    const cachedTimestamp = localStorage.getItem(`stock_history_${ticker}_DateTimestamp`);
-    const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
+		const stockData = getStockData(props.ticker);
 
-    if (isDataValid && cachedData) {
-      return JSON.parse(cachedData);
-    }
+		const yMax = Math.max(
+			Math.max(...stockData.map((point) => point.y)),
+			...(data.length > 0 ? [Math.max(...data.map((point) => point.y))] : [])
+		);
 
-    return [];
-  };
+		const yMin = Math.min(
+			Math.min(...stockData.map((point) => point.y)),
+			...(data.length > 0 ? [Math.min(...data.map((point) => point.y))] : [])
+		);
 
-  useEffect(() => {
-    setIsLoading(true);
+		const yRange = yMax - yMin;
+		const yPadding = 0.1; // You can adjust this padding as needed
 
-    const fetchData = async () => {
-      try {
-        const cachedData = localStorage.getItem(`stock_history_${props.ticker}`);
-        const cachedTimestamp = localStorage.getItem(`stock_history_${props.ticker}_DateTimestamp`);
-        const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
+		const datasets = [
+			{
+				label: props.ticker,
+				data: stockData,
+				borderColor: 'rgb(250 204 21)',
+				fill: true,
+				pointRadius: 0,
+				pointHoverRadius: 0,
+			},
+		];
+		if (formData.symbol) {
+			datasets.push({
+				label: formData.symbol.toUpperCase(),
+				data: data,
+				borderColor: 'rgba(255,255,255)',
+				fill: true,
+				pointRadius: 0,
+				pointHoverRadius: 0,
+			});
+		}
 
-        if (isDataValid && cachedData) {
-          const stockData = JSON.parse(cachedData);
-          setIsLoading(false);
-          createStockChart(stockData);
-        } else {
-          const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${props.ticker}/history`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
+		chartInstance.current = new Chart(ctx, {
+			type: 'line',
+			data: {
+				datasets: datasets,
+			},
+			options: {
+				scales: {
+					x: {
+						type: 'time',
+						time: {
+							unit: 'day',
+						},
+						title: {
+							display: true,
+							text: 'Date',
+						},
+					},
+					y: {
+						title: {
+							display: true,
+							text: 'Stock Price',
+						},
+						suggestedMin: yMin - yRange * yPadding,
+						suggestedMax: yMax + yRange * yPadding,
+					},
+				},
+				animation: {
+					duration: 1000,
+					easing: 'easeInOutQuart',
+				},
+			},
+		});
+		setFormData({ symbol: '' });
+	};
 
-          if (!response.ok) {
-            if (response.status === 500) {
-              console.log(response);
-              setTimeout(() => {
-                fetchData();
-              }, 60 * 1000);
-            }
-            console.log(response);
-          }
-          else {
-            const data = await response.json();
-            const stockData = data.results.map((result) => ({
-              x: moment(result.t),
-              y: result.c,
-            }));
+	const getStockData = (ticker) => {
+		const cachedData = localStorage.getItem(`stock_history_${ticker}`);
+		const cachedTimestamp = localStorage.getItem(`stock_history_${ticker}_DateTimestamp`);
+		const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
 
-            localStorage.setItem(`stock_history_${props.ticker}`, JSON.stringify(stockData));
-            localStorage.setItem(`stock_history_${props.ticker}_DateTimestamp`, Date.now().toString());
-            createStockChart(stockData);
-            setIsLoading(false);
-          }
-        }
-      } catch (error) {
-        console.error('Error loading stock data:', error);
-        setIsLoading(false);
-      }
-    };
+		if (isDataValid && cachedData) {
+			return JSON.parse(cachedData);
+		}
 
-    fetchData();
-  }, [props.ticker]);
+		return [];
+	};
 
-  return (
-    <React.Fragment>
-      {isLoading && <LoadingSpinner asFormOverlay loadText='Fetching chart data, this may take a minute...' />}
-      <div className="w-full flex justify-end">
-        <div className="relative flex w-1/4">
-          <input
-            type="text"
-            placeholder="Symbol to compare"
-            name="symbol"
-            className="form-input text-xs text-black w-2/3 px-4 py-2 mt-2 ml-48 border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
-            value={formData.symbol}
-            onChange={handleChange}
-          />
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="absolute right-0 bg-emerald-900 border-2 border-emerald-900 text-white text-xs font-bold w-1/4 py-2 px-4 mt-2 rounded-full focus:border-transparent focus:ring-1 focus:ring-emerald-900 hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
-          >
-            Compare
-          </button>
-        </div>
-      </div>
-      <canvas ref={chartRef} className="my-4 max-h-96 -mt-8" />
-    </React.Fragment>
-  );
+	useEffect(() => {
+		setIsLoading(true);
+
+		const fetchData = async () => {
+			try {
+				const cachedData = localStorage.getItem(`stock_history_${props.ticker}`);
+				const cachedTimestamp = localStorage.getItem(`stock_history_${props.ticker}_DateTimestamp`);
+				const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
+
+				if (isDataValid && cachedData) {
+					const stockData = JSON.parse(cachedData);
+					setIsLoading(false);
+					createStockChart(stockData);
+				} else {
+					const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${props.ticker}/history`, {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+					});
+
+					if (!response.ok) {
+						if (response.status === 500) {
+							console.log(response);
+							setTimeout(() => {
+								fetchData();
+							}, 60 * 1000);
+						}
+						console.log(response);
+					} else {
+						const data = await response.json();
+						const stockData = data.results.map((result) => ({
+							x: moment(result.t),
+							y: result.c,
+						}));
+
+						localStorage.setItem(`stock_history_${props.ticker}`, JSON.stringify(stockData));
+						localStorage.setItem(`stock_history_${props.ticker}_DateTimestamp`, Date.now().toString());
+						createStockChart(stockData);
+						setIsLoading(false);
+					}
+				}
+			} catch (error) {
+				console.error('Error loading stock data:', error);
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [props.ticker]);
+
+	return (
+		<React.Fragment>
+			{isLoading && (
+				<LoadingSpinner
+					asFormOverlay
+					loadText="Fetching chart data, this may take a minute..."
+				/>
+			)}
+			<div className="w-full flex justify-end">
+				<div className="relative flex w-1/4">
+					<input
+						type="text"
+						placeholder="Symbol to compare"
+						name="symbol"
+						className="form-input text-xs text-black w-2/3 px-4 py-2 mt-2 ml-48 border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
+						value={formData.symbol}
+						onChange={handleChange}
+					/>
+					<button
+						type="submit"
+						onClick={handleSubmit}
+						className="absolute right-0 bg-emerald-900 border-2 border-emerald-900 text-white text-xs font-bold w-1/4 py-2 px-4 mt-2 rounded-full focus:border-transparent focus:ring-1 focus:ring-emerald-900 hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+					>
+						Compare
+					</button>
+				</div>
+			</div>
+			<canvas
+				ref={chartRef}
+				className="my-4 max-h-96 -mt-8"
+			/>
+		</React.Fragment>
+	);
 };
 
 export default StockChart;
