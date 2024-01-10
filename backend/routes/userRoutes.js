@@ -32,6 +32,24 @@ async function getUserByEmail(email) {
 
 router.use(express.json());
 
+router.get('/', verifyToken, async (req, res) => {
+	const userID = req.user.userId;
+
+	let user;
+
+	try {
+		user = await User.findOne({ _id: userID });
+
+		if (!user) {
+			return res.status(404).json({ error: 'User not found' });
+		}
+
+		return res.status(201).json({ user: user });
+	} catch (err) {
+		console.log(err);
+	}
+});
+
 router.post('/signup', async (req, res) => {
 	const { name, email, password } = req.body;
 
@@ -55,12 +73,10 @@ router.post('/signup', async (req, res) => {
 		const hasSpecialChar = /[^a-zA-Z0-9]/.test(password);
 
 		if (!(password.length >= minLength && hasLetter && hasNumber && hasSpecialChar)) {
-			return res
-				.status(400)
-				.json({
-					error:
-						'Invalid password. Please ensure it has at least 8 characters and includes letters, numbers, and at least one special character',
-				});
+			return res.status(400).json({
+				error:
+					'Invalid password. Please ensure it has at least 8 characters and includes letters, numbers, and at least one special character',
+			});
 		}
 
 		const newUser = new User({

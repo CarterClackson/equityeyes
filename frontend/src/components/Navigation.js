@@ -7,7 +7,7 @@ import { getAuthToken } from '../utils/cookieUtils';
 
 import '../styles/Navigation.css';
 
-const Nav = () => {
+const Nav = (props) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 	useEffect(() => {
@@ -29,7 +29,6 @@ const Nav = () => {
 
 	const authNavItems = [
 		{ label: 'Dashboard', to: '/dashboard' },
-		{ label: 'Settings', to: '/test1' },
 		// Add more items as needed
 	];
 
@@ -57,14 +56,24 @@ const Nav = () => {
 						</li>
 					))}
 				{isLoggedIn && (
-					<li>
-						<button
-							className="text-white font-medium px-4 py-2 hover:text-gray-300 transition-all"
-							onClick={(e) => handleLogout(e, updateIsLoggedIn)}
-						>
-							Logout
-						</button>
-					</li>
+					<>
+						<li>
+							<button
+								className="text-white font-medium px-4 py-2 hover:text-gray-300 transition-all"
+								onClick={() => props.showSettings()}
+							>
+								Settings
+							</button>
+						</li>
+						<li>
+							<button
+								className="text-white font-medium px-4 py-2 hover:text-gray-300 transition-all"
+								onClick={(e) => handleLogout(e, updateIsLoggedIn)}
+							>
+								Logout
+							</button>
+						</li>
+					</>
 				)}
 				{!isLoggedIn && (
 					<li>
