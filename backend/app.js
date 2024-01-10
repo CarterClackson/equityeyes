@@ -25,10 +25,10 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 const corsOptions = {
-  origin: 'http://localhost:3005',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-  optionsSuccessStatus: 204,
+	origin: 'http://localhost:3005',
+	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+	credentials: true,
+	optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
@@ -44,20 +44,17 @@ app.use('/stocks', stocksRoutes);
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
 
-
 mongoose
-  .connect(
-    uri
-  )
-  .then(() => {
-    if (process.env.NODE_ENV !== 'test') {
-      app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-      });
-    }
-  })
-  .catch(err => {
-      console.log(err);
-  });
+	.connect(uri)
+	.then(() => {
+		if (process.env.NODE_ENV !== 'test') {
+			app.listen(PORT, () => {
+				console.log(`Server is running on http://localhost:${PORT}`);
+			});
+		}
+	})
+	.catch((err) => {
+		console.log(err);
+	});
 
-  module.exports = app;
+module.exports = app;

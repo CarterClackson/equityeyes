@@ -12,76 +12,78 @@ const User = require('../models/user');
 const { restart } = require('nodemon');
 
 const handleTokenGeneration = (req, res, user) => {
-    const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '7d' });
+	const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '7d' });
 
-    res.cookie('authToken', token, { 
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    res.redirect('http://localhost:3005/dashboard');
+	res.cookie('authToken', token, {
+		maxAge: 7 * 24 * 60 * 60 * 1000,
+	});
+	res.redirect('http://localhost:3005/dashboard');
 };
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get('/google/callback',
-    (req, res, next) => {
-        passport.authenticate('google', (err, user, info) => {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ error: 'Internal Server Error' });
-            }
+router.get(
+	'/google/callback',
+	(req, res, next) => {
+		passport.authenticate('google', (err, user, info) => {
+			if (err) {
+				console.error(err);
+				return res.status(500).json({ error: 'Internal Server Error' });
+			}
 
-            if (!user) {
-                return res.status(401).json({ error: 'Authentication failed', info });
-            }
+			if (!user) {
+				return res.status(401).json({ error: 'Authentication failed', info });
+			}
 
-            req.logIn(user, (err) => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).json({ error: 'Internal Server Error' });
-                }
-                handleTokenGeneration(req, res, user);
-            });
-        })(req, res, next);
-    },
-    (req, res) => {
-        if (!req.user) {
-            return res.status(401).json({ error: 'Authentication failed' });
-        }
-    }
+			req.logIn(user, (err) => {
+				if (err) {
+					console.error(err);
+					return res.status(500).json({ error: 'Internal Server Error' });
+				}
+				handleTokenGeneration(req, res, user);
+			});
+		})(req, res, next);
+	},
+	(req, res) => {
+		if (!req.user) {
+			return res.status(401).json({ error: 'Authentication failed' });
+		}
+	}
 );
 
 router.get('/github', passport.authenticate('github'));
 
-router.get('/github/callback',
-    (req, res, next) => {
-        passport.authenticate('github', { failureRedirect: 'http://localhost:3005/login-failed' },  (err, user, info) => {
-            if (err) {
-                // Handle unexpected errors
-                console.error(err);
-                return res.status(500).json({ error: 'Internal Server Error' });
-            }
+router.get(
+	'/github/callback',
+	(req, res, next) => {
+		passport.authenticate('github', { failureRedirect: 'http://localhost:3005/login-failed' }, (err, user, info) => {
+			if (err) {
+				// Handle unexpected errors
+				console.error(err);
+				return res.status(500).json({ error: 'Internal Server Error' });
+			}
 
-            if (!user) {
-                // Handle authentication failure
-                return res.status(401).json({ error: 'Authentication failed', info });
-            }
+			if (!user) {
+				// Handle authentication failure
+				return res.status(401).json({ error: 'Authentication failed', info });
+			}
 
-            // Handle successful authentication
-            req.logIn(user, (err) => {
-                if (err) {
-                    console.error(err);
-                    return res.status(500).json({ error: 'Internal Server Error' });
-                }
-                handleTokenGeneration(req, res, user);
-            });
-        })(req, res, next);
-    },
-    (req, res) => {
-        // Ensure the user is available in the request
-        if (!req.user) {
-            return res.status(401).json({ error: 'Authentication failed' });
-        }
-    }
+			// Handle successful authentication
+			req.logIn(user, (err) => {
+				if (err) {
+					console.error(err);
+					return res.status(500).json({ error: 'Internal Server Error' });
+				}
+				handleTokenGeneration(req, res, user);
+			});
+		})(req, res, next);
+	},
+	(req, res) => {
+		// Ensure the user is available in the request
+		if (!req.user) {
+			return res.status(401).json({ error: 'Authentication failed' });
+		}
+	}
 );
 
 module.exports = router;
