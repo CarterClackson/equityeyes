@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
-
 import { getAuthToken } from '../utils/cookieUtils';
-
 import StockSearch from './UIElements/StockSearch';
 import DetailsView from './UIElements/DetailsView';
-
 import LoadingSpinner from './UIElements/LoadingSpinner';
-
 import '../styles/DataPanel.css';
 
 const DataPanel = (props) => {
@@ -17,6 +13,7 @@ const DataPanel = (props) => {
 
 	const [showSearch, setShowSearch] = useState(false);
 	const [showDetails, setShowDetails] = useState(false);
+	const [showNews, setShowNews] = useState(false);
 	const [detailsData, setDetailsData] = useState({});
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -33,6 +30,10 @@ const DataPanel = (props) => {
 	};
 	const handleResetDetails = () => {
 		setShowDetails(false);
+	};
+
+	const handleResetNews = (value) => {
+		setShowNews(value);
 	};
 
 	const handleRemoveStock = async (e, stockTicker) => {
@@ -79,6 +80,7 @@ const DataPanel = (props) => {
 			if (isDataValid && cachedData) {
 				setDetailsData(JSON.parse(cachedData));
 				setShowDetails(true);
+				handleResetNews(false);
 				setIsLoading(false);
 			} else {
 				const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${stockTicker}`, {
@@ -106,6 +108,7 @@ const DataPanel = (props) => {
 					setDetailsData(details);
 					localStorage.setItem(`stock_details_${stockTicker}`, JSON.stringify(details));
 					localStorage.setItem(`stock_details_${stockTicker}_DateTimestamp`, Date.now().toString());
+					handleResetNews(false);
 					setIsLoading(false);
 				}
 			}
@@ -185,20 +188,17 @@ const DataPanel = (props) => {
 				{data.length <= 4 && (
 					<div
 						onClick={handleAddStock}
-						className={`border-4 border-emerald-900 group p-6 rounded-lg w-full flex justify-center content-center items-center hover:border-emerald-700 transition-all cursor-pointer ${
-							showSearch ? 'border-emerald-700' : ''
+						className={`flex justify-center items-center group border-4 border-emerald-900 p-6 rounded-lg hover:border-4 hover:border-emerald-700 transition-all cursor-pointer ${
+							showSearch ? 'hidden' : ''
 						}`}
 					>
-						<i
-							class={`fas fa-thin fa-plus text-3xl text-emerald-900 group-hover:text-white transition-all ${
-								showSearch ? 'text-white' : ''
-							}`}
-						></i>
+						<i className="fas fa-sharp fa-plus-circle text-3xl text-emerald-900 group-hover:text-zinc-50 transition-all"></i>
 					</div>
 				)}
 			</div>
 			{showSearch && (
 				<StockSearch
+					userId={props.userId}
 					onStockSelect={handleAddStock}
 					savedStocks={data}
 					loadDetailsView={loadDetailsView}
@@ -206,17 +206,19 @@ const DataPanel = (props) => {
 					onShowSearch={handleResetShowSearch}
 				/>
 			)}
-			{isLoading && (
-				<LoadingSpinner
-					asFormOverlay
-					loadText="Fetching stock details, this may take a minute.."
-				/>
-			)}
 			{showDetails && (
 				<DetailsView
 					data={detailsData}
-					onShowDetails={handleResetDetails}
-					buyInPrice={props.userData}
+					onShowDetails={() => handleResetDetails()}
+					onShowNews={(value) => handleResetNews(value)}
+					showNews={showNews}
+					buyInPrice={data}
+				/>
+			)}
+			{isLoading && (
+				<LoadingSpinner
+					asOverlay
+					loadText="Fetching data..."
 				/>
 			)}
 		</main>
