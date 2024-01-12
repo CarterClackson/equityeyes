@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getAuthToken } from '../../utils/cookieUtils';
-import LoadingSpinner from './LoadingSpinner';
 
 const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsView, savedStocks }) => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
-	const [isLoading, setIsLoading] = useState(false);
 
 	// Fetch data when the component mounts
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				setIsLoading(true);
 				const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}stocks`, {
 					method: 'GET',
 					headers: {
@@ -29,28 +26,39 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 			} catch (error) {
 				console.log(error);
 			} finally {
-				setIsLoading(false);
 			}
 		};
 
 		fetchData();
-	}, []); // The empty dependency array ensures this effect runs only once
+	}, []);
 
 	// Filter results based on the searchQuery
 	const filteredResults =
 		searchQuery.trim() === ''
 			? []
-			: searchResults.filter(
-					(result) =>
-						result.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
-						result.name.toLowerCase().includes(searchQuery.toLowerCase())
-			  );
+			: searchResults
+					.filter(
+						(result) =>
+							result.symbol.toLowerCase().includes(searchQuery.toLowerCase()) ||
+							result.name.toLowerCase().includes(searchQuery.toLowerCase())
+					)
+					.sort((a, b) => {
+						// Sort based on relevance to the search term
+						const aSymbolIndex = a.symbol.toLowerCase().indexOf(searchQuery.toLowerCase());
+						const bSymbolIndex = b.symbol.toLowerCase().indexOf(searchQuery.toLowerCase());
+						const aNameIndex = a.name.toLowerCase().indexOf(searchQuery.toLowerCase());
+						const bNameIndex = b.name.toLowerCase().indexOf(searchQuery.toLowerCase());
 
-	const isStockSaved = (stock) => savedStocks.some((savedStock) => savedStock.symbol === stock.symbol);
+						const aTotalIndex = aSymbolIndex + aNameIndex;
+						const bTotalIndex = bSymbolIndex + bNameIndex;
+
+						return aTotalIndex - bTotalIndex;
+					});
+
+	const isStockSaved = (stock) => savedStocks && savedStocks.some((savedStock) => savedStock.symbol === stock.symbol);
 
 	const handleStockSelect = async (e, selectedStock) => {
 		e.stopPropagation();
-		setIsLoading(true);
 		onStockSelect(selectedStock);
 		onShowSearch();
 		setSearchQuery('');
@@ -74,10 +82,8 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 			}
 			const data = await response.json();
 			onForceUpdate(data);
-			setIsLoading(false);
 		} catch (error) {
 			console.log(error);
-			setIsLoading(false);
 		}
 	};
 
@@ -114,14 +120,8 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 				className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3"
 				onClick={() => onShowSearch()}
 			>
-				<i class="fas fa-solid fa-x"></i>
+				<i className="fas fa-solid fa-x"></i>
 			</span>
-			{isLoading && (
-				<LoadingSpinner
-					asSearchOverlay
-					loadText={'Fetching stocks...'}
-				/>
-			)}
 			{searchQuery.trim() !== '' && (
 				<ul className="mt-2 max-h-60 overflow-y-scroll overflow-x-clip">
 					{filteredResults.length > 0 ? (

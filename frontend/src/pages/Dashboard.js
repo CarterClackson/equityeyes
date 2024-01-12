@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import DataPanel from '../components/DataPanel';
+import SettingsDrawer from '../components/SettingsDrawer';
 import Nav from '../components/Navigation';
 import LoadingSpinner from '../components/UIElements/LoadingSpinner';
 
@@ -14,6 +15,7 @@ const Dashboard = () => {
 	// Render states
 	const [isLoading, setIsLoading] = useState(false);
 	const [needsUpdate, setNeedsUpdate] = useState(false);
+	const [showSettings, setShowSettings] = useState(false);
 
 	//Error states
 	const [errorResponse, setErrorResponse] = useState('');
@@ -138,9 +140,13 @@ const Dashboard = () => {
 		setIsLoading(state);
 	};
 
+	const handleShowSettings = () => {
+		setShowSettings((prevState) => !prevState);
+	};
+
 	return (
 		<React.Fragment>
-			<Nav />
+			<Nav showSettings={() => handleShowSettings()} />
 			{isLoading && (
 				<LoadingSpinner
 					asBlockingOverlay
@@ -157,6 +163,7 @@ const Dashboard = () => {
 				setUserData={setUserData}
 				getUserId={getUserId}
 			/>
+			{showSettings && <SettingsDrawer userID={userID} />}
 		</React.Fragment>
 	);
 };

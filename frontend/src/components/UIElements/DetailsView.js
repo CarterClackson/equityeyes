@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-
 import StockChart from './Chart';
+import LoadingSpinner from './LoadingSpinner';
 
 const DetailsView = (props) => {
 	const tickerData = props.data.ticker.results;
 	const stockData = props.data.stock;
 
+	const [stockNews, setStockNews] = useState([]);
+	// eslint-disable-next-line no-unused-vars
+	const [showStockNews, setShowStockNews] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [expanded, setExpanded] = useState(false);
 	const characterLimit = 275;
 
@@ -55,6 +59,57 @@ const DetailsView = (props) => {
 					</span>
 				</>
 			);
+		}
+	};
+
+	const fetchNews = async (stockTicker) => {
+		setIsLoading(true);
+		try {
+			const cachedData = localStorage.getItem(`stock_news_${stockTicker}`);
+			const cachedTimestamp = localStorage.getItem(`stock_news_${stockTicker}_DateTimestamp`);
+			const isDataValid = cachedTimestamp && Date.now() - Number(cachedTimestamp) < 24 * 60 * 60 * 1000;
+
+			// If data exists, pull it from storage.
+			if (isDataValid && cachedData) {
+				setStockNews(JSON.parse(cachedData));
+				setShowStockNews(true);
+				setIsLoading(false);
+			} else {
+				const response = await fetch(process.env.REACT_APP_BACKEND_URL + `stock/${stockTicker}/news`, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				});
+
+				if (!response.ok) {
+					if (response.status === 500) {
+						console.log(response);
+						setTimeout(() => {
+							console.log('secondary');
+							fetchNews(stockTicker);
+						}, 60 * 1000);
+					} else {
+						console.log(response);
+					}
+				}
+
+				if (response.status === 200) {
+					const news = await response.json();
+					setStockNews(news);
+					setShowStockNews(true);
+					localStorage.setItem(`stock_news_${stockTicker}`, JSON.stringify(news));
+					localStorage.setItem(`stock_news_${stockTicker}_DateTimestamp`, Date.now().toString());
+					setIsLoading(false);
+				}
+			}
+		} catch (error) {
+			console.log(error);
+			setTimeout(() => {
+				fetchNews(stockTicker);
+			}, 60 * 1000);
+		} finally {
+			//setIsLoading(false);
 		}
 	};
 
@@ -137,6 +192,49 @@ const DetailsView = (props) => {
 								<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
 							)}
 						</span>
+					</div>
+				</div>
+				<div className="flex flex-col items-center content-center justify-center">
+					<button
+						type="button"
+						onClick={() => {
+							fetchNews(`${tickerData.ticker}`);
+							props.onShowNews(true);
+						}}
+						className="bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-48 py-3 px-4 my-8 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+					>
+						View News
+					</button>
+					<div className="flex grid-rows-1">
+						{isLoading && (
+							<LoadingSpinner
+								asSearchOverlay
+								loadText={`Fetching ${tickerData.ticker} news...`}
+							/>
+						)}
+						{props.showNews &&
+							stockNews.map((stock, index) => (
+								<div
+									key={index}
+									className="flex flex-col items-center min-h-48 p-4 mx-2 border-4 border-emerald-900 rounded-lg w-1/3"
+								>
+									<h4 className="self-start text-yellow-400 text-xl font-bold">
+										<a href={`${stock.article_url}`}>{stock.title.slice(0, 50) + '...'}</a>
+									</h4>
+									<span className="self-start mt-1 text-sm text-zinc-300">{stock.author}</span>
+									<p className="text-zinc-50 mt-4 mb-8">
+										{stock.description.slice(0, 250) + (stock.description.length > 250 ? '...' : '')}
+									</p>
+									<a
+										href={`${stock.article_url}`}
+										target="_blank"
+										rel="noreferrer"
+										className="bg-emerald-900 border-2 border-emerald-900 text-white text-center font-bold w-48 py-3 px-4 mt-auto rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+									>
+										View Article
+									</a>
+								</div>
+							))}
 					</div>
 				</div>
 			</div>
