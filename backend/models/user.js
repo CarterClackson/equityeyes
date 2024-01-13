@@ -49,6 +49,7 @@ const userSchema = new Schema({
 			type: [String],
 			default: ['XNYS'],
 		},
+		termsaccepted: { type: Boolean, required: false, default: false },
 	},
 });
 

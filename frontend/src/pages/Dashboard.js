@@ -163,7 +163,15 @@ const Dashboard = () => {
 				setUserData={setUserData}
 				getUserId={getUserId}
 			/>
-			{showSettings && <SettingsDrawer userID={userID} />}
+			{showSettings && (
+				<SettingsDrawer
+					userID={userID}
+					className={showSettings ? 'open' : ''}
+					showSettings={() => {
+						handleShowSettings();
+					}}
+				/>
+			)}
 		</React.Fragment>
 	);
 };
