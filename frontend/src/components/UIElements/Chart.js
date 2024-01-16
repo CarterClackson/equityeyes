@@ -95,8 +95,8 @@ const StockChart = (props) => {
 				data: stockData,
 				borderColor: 'rgb(250 204 21)',
 				fill: true,
-				pointRadius: 0,
-				pointHoverRadius: 0,
+				pointRadius: 1,
+				pointHoverRadius: 10,
 			},
 		];
 		if (formData.symbol) {
@@ -105,8 +105,8 @@ const StockChart = (props) => {
 				data: data,
 				borderColor: 'rgba(255,255,255)',
 				fill: true,
-				pointRadius: 0,
-				pointHoverRadius: 0,
+				pointRadius: 1,
+				pointHoverRadius: 10,
 			});
 		}
 
@@ -217,13 +217,13 @@ const StockChart = (props) => {
 					loadText="Fetching chart data, this may take a minute..."
 				/>
 			)}
-			<div className="w-full flex justify-end">
-				<div className="relative flex w-1/4">
+			<div className="w-3/4 mr-0 ml-auto flex justify-end">
+				<div className="relative flex w-1/2">
 					<input
 						type="text"
 						placeholder="Symbol to compare"
 						name="symbol"
-						className="form-input text-xs text-black w-2/3 px-4 py-2 mt-2 ml-48 border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
+						className="form-input text-xs text-black w-1/2 px-4 py-2 mt-2 mr-2 ml-auto border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
 						value={formData.symbol}
 						onChange={handleChange}
 					/>

@@ -3,6 +3,7 @@
 const express = require('express');
 const passport = require('passport');
 const { validationResult } = require('express-validator');
+const moment = require('moment-timezone');
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -150,13 +151,24 @@ router.patch('/update/user-data', verifyToken, async (req, res) => {
 	const updateUserData = req.body;
 
 	try {
-		const user = await User.findOneAndUpdate({ _id: userID }, { $set: updateUserData }, { new: true });
+		const updatePromises = [];
 
-		if (!user) {
+		for (const key in updateUserData) {
+			const updatePromise = User.findOneAndUpdate(
+				{ _id: userID },
+				{ $set: { [key]: updateUserData[key] } },
+				{ new: true }
+			);
+			updatePromises.push(updatePromise);
+		}
+
+		const updatedUser = await Promise.all(updatePromises);
+
+		if (!updatedUser.some(Boolean)) {
 			return res.status(404).json({ error: 'User not found' });
 		}
 
-		res.json({ message: 'User data updated successfully', user });
+		res.json({ message: 'User data updated successfully', user: updatedUser });
 	} catch (error) {
 		console.error('Error updating user data:', error);
 		res.status(500).json({ error: 'Internal Server Error' });
@@ -201,22 +213,31 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
 	let stockData;
 
 	try {
-		const currentDate = new Date();
-		let dateToFetchData = new Date(currentDate);
+		const currentDate = moment().tz('America/New_York');
 
 		// Check if it's Sunday or Monday
-		if (currentDate.getDay() === 0) {
+		if (currentDate.day() === 0) {
 			// Sunday, fetch data from Friday
-			dateToFetchData.setDate(currentDate.getDate() - 3);
-		} else if (currentDate.getDay() === 1) {
+			currentDate.subtract(2, 'days');
+		} else if (currentDate.day() === 1) {
 			// Monday, fetch data from Friday
-			dateToFetchData.setDate(currentDate.getDate() - 4);
+			currentDate.subtract(4, 'days');
 		} else {
 			// Fetch data from yesterday for all other days
-			dateToFetchData.setDate(currentDate.getDate() - 1);
+			currentDate.subtract(1, 'days');
+		}
+		// Check if it's before 9:30 AM and not Sunday or Monday
+		if (currentDate.hour() < 11) {
+			const today = moment().tz('America/New_York');
+			if (today.day() === 2) {
+				currentDate.subtract(3, 'days');
+			} else {
+				currentDate.subtract(1, 'days');
+			}
+			// Adjust the date to be another day back
 		}
 
-		const formattedDate = dateToFetchData.toISOString().split('T')[0];
+		const formattedDate = currentDate.format('YYYY-MM-DD');
 
 		const response = await axios.get(`${baseURL}/open-close/${savedStockTicker}/${formattedDate}`, {
 			params: {
@@ -298,33 +319,41 @@ router.delete('/stocks/delete', verifyToken, async (req, res) => {
 router.get('/stocks', verifyToken, async (req, res) => {
 	const userID = req.user.userId;
 
-	let user;
-
 	try {
-		user = await User.findOne({ _id: userID });
+		const user = await User.findOne({ _id: userID });
 
 		if (!user) {
 			return res.status(404).json({ error: 'User not found' });
 		}
 
 		const savedStocks = user.savedStocks;
+
 		if (savedStocks && savedStocks.length > 0) {
-			const currentDate = new Date();
-			let dateToFetchData = new Date(currentDate);
+			const currentDate = moment().tz('America/New_York');
 
 			// Check if it's Sunday or Monday
-			if (currentDate.getDay() === 0) {
+			if (currentDate.day() === 0) {
 				// Sunday, fetch data from Friday
-				dateToFetchData.setDate(currentDate.getDate() - 2);
-			} else if (currentDate.getDay() === 1) {
+				currentDate.subtract(2, 'days');
+			} else if (currentDate.day() === 1) {
 				// Monday, fetch data from Friday
-				dateToFetchData.setDate(currentDate.getDate() - 4);
+				currentDate.subtract(4, 'days');
 			} else {
 				// Fetch data from yesterday for all other days
-				dateToFetchData.setDate(currentDate.getDate() - 1);
+				currentDate.subtract(1, 'days');
+			}
+			// Check if it's before 9:30 AM and not Sunday or Monday
+			if (currentDate.hour() < 11) {
+				const today = moment().tz('America/New_York');
+				if (today.day() === 2) {
+					currentDate.subtract(3, 'days');
+				} else {
+					currentDate.subtract(1, 'days');
+				}
+				// Adjust the date to be another day back
 			}
 
-			const formattedDate = dateToFetchData.toISOString().split('T')[0];
+			const formattedDate = currentDate.format('YYYY-MM-DD');
 
 			const stockDataPromises = savedStocks.map(async (stock) => {
 				const response = await axios.get(`${baseURL}/open-close/${stock.ticker}/${formattedDate}`, {
@@ -335,14 +364,17 @@ router.get('/stocks', verifyToken, async (req, res) => {
 				});
 				return { symbol: stock.ticker, buyInPrice: stock.buyInPrice, data: response.data };
 			});
+
 			const stockData = await Promise.all(stockDataPromises);
 			return res.status(201).json(stockData);
 		}
+
 		return res.status(204).json({ message: 'User has no saved stocks.' });
 	} catch (error) {
 		if (error.response && error.response.status === 429) {
 			return res.status(429).json({ message: 'Polygon API limit exceeded. Wait a minute and try again.' });
 		}
+
 		console.error(error);
 		return res.status(500).json({ error: 'Internal Server Error' });
 	}
