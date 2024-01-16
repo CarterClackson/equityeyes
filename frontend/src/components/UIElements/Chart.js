@@ -214,23 +214,23 @@ const StockChart = (props) => {
 			{isLoading && (
 				<LoadingSpinner
 					asFormOverlay
-					loadText='Fetching chart data, this may take a minute...'
+					loadText="Fetching chart data, this may take a minute..."
 				/>
 			)}
-			<div className='w-3/4 mr-0 ml-auto flex justify-end'>
-				<div className='relative flex w-1/2'>
+			<div className="w-3/4 mr-0 ml-auto flex justify-end">
+				<div className="relative flex w-1/2">
 					<input
-						type='text'
-						placeholder='Symbol to compare'
-						name='symbol'
-						className='form-input text-xs text-black w-1/2 px-4 py-2 mt-2 mr-2 ml-auto border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700'
+						type="text"
+						placeholder="Symbol to compare"
+						name="symbol"
+						className="form-input text-xs text-black w-1/2 px-4 py-2 mt-2 mr-2 ml-auto border-2 border-white rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
 						value={formData.symbol}
 						onChange={handleChange}
 					/>
 					<button
-						type='submit'
+						type="submit"
 						onClick={handleSubmit}
-						className='absolute right-0 bg-emerald-900 border-2 border-emerald-900 text-white text-xs font-bold w-1/4 py-2 px-4 mt-2 rounded-full focus:border-transparent focus:ring-1 focus:ring-emerald-900 hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all'
+						className="absolute right-0 bg-emerald-900 border-2 border-emerald-900 text-white text-xs font-bold w-1/4 py-2 px-4 mt-2 rounded-full focus:border-transparent focus:ring-1 focus:ring-emerald-900 hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
 					>
 						Compare
 					</button>
@@ -238,7 +238,7 @@ const StockChart = (props) => {
 			</div>
 			<canvas
 				ref={chartRef}
-				className='my-4 max-h-96 -mt-8'
+				className="my-4 max-h-96 -mt-8"
 			/>
 		</React.Fragment>
 	);

@@ -166,7 +166,8 @@ const SettingsDrawer = (props) => {
 				},
 				body: JSON.stringify({
 					settings: {
-						currency: formData.currency,
+						...userData.settings, // Include existing settings
+						...formData.settings, // Include updated settings
 					},
 				}),
 			});
@@ -179,7 +180,7 @@ const SettingsDrawer = (props) => {
 				...prevUserData,
 				settings: {
 					...prevUserData.settings,
-					currency: formData.currency,
+					...formData.settings,
 				},
 			}));
 

@@ -3,7 +3,9 @@ import React, { useEffect, useState } from 'react';
 import DataPanel from '../components/DataPanel';
 import SettingsDrawer from '../components/SettingsDrawer';
 import Nav from '../components/Navigation';
+import LoginForm from '../components/UIElements/LoginForm';
 import LoadingSpinner from '../components/UIElements/LoadingSpinner';
+import TCModal from '../components/UIElements/Modal';
 
 import { getAuthToken } from '../utils/cookieUtils';
 
@@ -11,6 +13,7 @@ const Dashboard = () => {
 	//User states
 	const [userData, setUserData] = useState([]);
 	const [userID, setUserID] = useState('');
+	const [tempUserData, setTempUserData] = useState(null);
 
 	// Render states
 	const [isLoading, setIsLoading] = useState(false);
@@ -105,6 +108,34 @@ const Dashboard = () => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [needsUpdate]);
 
+	useEffect(() => {
+		const fetchUserSettings = async () => {
+			setIsLoading(true);
+			try {
+				const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}user`, {
+					method: 'GET',
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: `Bearer ${getAuthToken()}`,
+					},
+				});
+
+				if (!response.ok) {
+					throw new Error('Network response not ok');
+				}
+
+				const userDataTemp = await response.json();
+				setTempUserData(userDataTemp);
+				setIsLoading(false);
+			} catch (error) {
+				console.log(error);
+				setIsLoading(false);
+			}
+		};
+
+		fetchUserSettings();
+	}, []);
+
 	const handleForceUpdate = async (newStockData) => {
 		// Retrieve the existing data from local storage
 		const userId = await getUserId();
@@ -153,16 +184,33 @@ const Dashboard = () => {
 					loadText={loadText}
 				/>
 			)}
-			<DataPanel
-				userData={userData}
-				userID={userID}
-				deleteUpdate={handleDeleteUpdate}
-				needsUpdate={handleForceUpdate}
-				errorResponse={errorResponse}
-				isLoading={handleIsLoading}
-				setUserData={setUserData}
-				getUserId={getUserId}
-			/>
+			{tempUserData && !tempUserData.user?.settings?.termsaccepted && (
+				<TCModal
+					title='Terms and Conditions'
+					userID={userID}
+				/>
+			)}
+			{userID && (
+				<DataPanel
+					userData={userData}
+					userID={userID}
+					deleteUpdate={handleDeleteUpdate}
+					needsUpdate={handleForceUpdate}
+					errorResponse={errorResponse}
+					isLoading={handleIsLoading}
+					setUserData={setUserData}
+					getUserId={getUserId}
+				/>
+			)}
+			{!userID && (
+				<div className='inset-0 bg-black-50 text-white p-4 py-44 flex flex-col justify-center items-center h-svh'>
+					<h1 className='text-4xl font-bold mb-10'>Login to view your Dashboard</h1>
+					<LoginForm
+						loadText='Please wait...'
+						isSignup={false}
+					/>
+				</div>
+			)}
 			{showSettings && (
 				<SettingsDrawer
 					userID={userID}
