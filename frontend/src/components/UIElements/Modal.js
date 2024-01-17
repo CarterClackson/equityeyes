@@ -6,13 +6,14 @@ import LoadingSpinner from './LoadingSpinner';
 
 const TCModal = (props) => {
 	const [isLoading, setIsLoading] = useState(false);
-	const [modalOpen, setModalOpen] = useState(true); // New state to track modal open/closed
+	const [modalOpen, setModalOpen] = useState(true);
+	const [modalOpacity, setModalOpacity] = useState(true);
 
 	let tempUserData;
 
 	const handleAccept = async () => {
 		setIsLoading(true);
-
+		setModalOpacity(true);
 		try {
 			const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}user/update/user-data`, {
 				method: 'PATCH',
@@ -31,9 +32,10 @@ const TCModal = (props) => {
 			if (!response.ok) {
 				throw new Error('Network response not ok');
 			}
-
-			// Close the modal on success
-			setModalOpen(false);
+			setModalOpacity(false);
+			setTimeout(() => {
+				setModalOpen(false);
+			}, 1000);
 
 			setIsLoading(false);
 		} catch (error) {
@@ -90,7 +92,9 @@ const TCModal = (props) => {
 					data-modal-backdrop='static'
 					tabIndex='-1'
 					aria-hidden='true'
-					className='fixed top-0 right-0 left-0 flex justify-center items-center w-full h-full bg-black bg-opacity-50 overflow-y-auto overflow-x-hidden z-20'
+					className={` ${
+						modalOpacity ? 'opacity-100' : 'opacity-0'
+					} fixed top-0 right-0 left-0 flex justify-center items-center w-full h-full bg-black bg-opacity-50 overflow-y-auto overflow-x-hidden z-20 transition ease-in-out duration-500`}
 				>
 					<div className='w-full max-w-2xl max-h-full relative p-4'>
 						<div className='bg-gradient-to-br from-zinc-950 to-zinc-900 text-zinc-50 border-4 border-emerald-900 rounded-lg shadow relative'>
