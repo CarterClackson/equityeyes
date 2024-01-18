@@ -17,11 +17,7 @@ const handleTokenGeneration = (req, res, user) => {
 	res.cookie('authToken', token, {
 		maxAge: 7 * 24 * 60 * 60 * 1000,
 	});
-	res.redirect(
-		process.env.NODE_ENV === 'production'
-			? 'https://equityeyes.netlify.app/dashboard'
-			: 'http://localhost:3005/dashboard'
-	);
+	res.redirect('https://equityeyes.netlify.app/dashboard');
 };
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -62,12 +58,7 @@ router.get(
 	(req, res, next) => {
 		passport.authenticate(
 			'github',
-			{
-				failureRedirect:
-					process.env.NODE_ENV === 'production'
-						? 'https://equityeyes.netlify.app/login-failed'
-						: 'http://localhost:3005/login-failed',
-			},
+			{ failureRedirect: 'https://equityeyes.netlify.app/login-failed' },
 			(err, user, info) => {
 				if (err) {
 					// Handle unexpected errors
