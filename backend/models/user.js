@@ -47,7 +47,7 @@ const userSchema = new Schema({
 		currency: { type: String, required: false, default: 'USD' },
 		markets: {
 			type: [String],
-			default: ['XNYS'],
+			default: ['XNYS', 'XNAS'],
 		},
 		termsaccepted: { type: Boolean, required: false, default: false },
 	},
