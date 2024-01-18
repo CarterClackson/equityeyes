@@ -8,9 +8,19 @@ const passportConfig = require('./middleware/passport');
 
 require('dotenv').config();
 
+const environment = process.env.NODE_ENV || 'dev';
+
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
-const uri = `mongodb+srv://${username}:${password}@equityeye.7ehlkcc.mongodb.net/equityEye?retryWrites=true&w=majority`;
+let uri;
+let frontEndURL = '';
+if (environment === 'production') {
+	uri = `mongodb+srv://${username}:${password}${process.env.DB_CONNECTION_STRING_PROD}`;
+	frontEndURL = process.env.FRONTEND_URL_PROD;
+} else {
+	uri = `mongodb+srv://${username}:${password}${process.env.DB_CONNECTION_STRING_DEV}`;
+	frontEndURL = process.env.FRONTEND_URL_DEV;
+}
 const secretKey = process.env.AUTH_SECRET_KEY;
 
 const authRoutes = require('./routes/authRoutes');
@@ -22,7 +32,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const corsOptions = {
-	origin: 'https://equityeyes.netlify.app',
+	origin: `${frontEndURL}`,
 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 	credentials: true,
 	optionsSuccessStatus: 204,

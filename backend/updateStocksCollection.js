@@ -6,10 +6,23 @@ const axios = require('axios');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
+const environment = process.env.NODE_ENV || 'test';
+
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
-const uri = `mongodb+srv://${username}:${password}@equityeye.7ehlkcc.mongodb.net/equityEye?retryWrites=true&w=majority`;
 const apiKey = process.env.POLYGON_API_KEY;
+
+let uri;
+if (environment === 'production') {
+	uri = `mongodb+srv://${username}:${password}${process.env.DB_CONNECTION_STRING_PROD}`;
+	frontEndURL = process.env.FRONTEND_URL_PROD;
+} else if (environment === 'test') {
+	uri = `mongodb+srv://${username}:${password}${process.env.DB_CONNECTION_STRING_TEST}`;
+	frontEndURL = process.env.FRONTEND_URL_TEST;
+} else {
+	uri = `mongodb+srv://${username}:${password}${process.env.DB_CONNECTION_STRING_DEV}`;
+	frontEndURL = process.env.FRONTEND_URL_DEV;
+}
 
 // Connect to your MongoDB database
 mongoose.connect(uri);

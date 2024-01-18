@@ -1,6 +1,6 @@
 # equityEyes
 
-A personalized and customizable stock analytics application. It is hosted on Netlify [here](https://google.ca) and relies on the free tier for Azure App Services for the backend server so it may take longer than expected to spin up on the first request.
+A personalized and customizable stock analytics application. It is hosted on Netlify [here](https://equityeyes.netlify.app) and relies on the free tier for Azure App Services for the backend server so it may take longer than expected to spin up on the first request.
 
 ## Frontend
 
@@ -28,8 +28,8 @@ This project utilizes Node.js, Express and MongoDB for the backend. MongoDB is h
 2. `npm install`
 3. Set up MongoDB Atlas, Google Auth and Github Auth
 4. Create env file from template included in backend folder
-5. `node updateStocksCollection.js` - this file will take awhile to run, but it fills your stocks collection in your database so taht you have something to work with and aren't constantly using API calls for polygon.
-6. `nodemon app.js`
+5. `NODE_ENV=dev node updateStocksCollection.js` - this file will take awhile to run, but it fills your stocks collection in your database so that you have something to work with and aren't constantly using API calls for polygon. Replace `dev` with whatever you want to be appended to your database name for environment naming convention.
+6. `npm run start:dev`
 7. Open [http://localhost:3005](http://localhost:3005) in your browser. If this URL is different make sure you update it in the env file for the frontend.
 
 ## Technologies Used

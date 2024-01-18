@@ -7,3 +7,9 @@ GOOGLE_CLIENT_SECRET=?????
 GITHUB_CLIENT_ID=?????
 GITHUB_CLIENT_SECRET=?????
 NODE_ENV=dev
+DB_CONNECTION_STRING_DEV=@*****.*****.mongodb.net/*****-dev?retryWrites=true&w=majority
+DB_CONNECTION_STRING_TEST=@*****.*****.mongodb.net/*****-test?retryWrites=true&w=majority
+DB_CONNECTION_STRING_PROD=@*****.*****.mongodb.net/*****-prod?retryWrites=true&w=majority
+FRONTEND_URL_DEV=http://localhost:3005
+FRONTEND_URL_TEST=http://localhost:3005
+FRONTEND_URL_PROD=https://equityeyes.netlify.app

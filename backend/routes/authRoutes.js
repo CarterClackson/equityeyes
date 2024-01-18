@@ -6,6 +6,17 @@ const verifyToken = require('../middleware/authenticate');
 
 const router = express.Router();
 
+require('dotenv').config();
+
+const environment = process.env.NODE_ENV || 'dev';
+
+let uri;
+if (environment === 'production') {
+	uri = process.env.FRONTEND_URL_PROD;
+} else {
+	uri = process.env.FRONTEND_URL_DEV;
+}
+
 const secretKey = process.env.AUTH_SECRET_KEY;
 
 const User = require('../models/user');
@@ -21,9 +32,9 @@ const handleTokenGeneration = (req, res, user) => {
 	const shouldIncludeTokenInURL = req.authStrategy === 'google' || req.authStrategy === 'github';
 
 	if (!shouldIncludeTokenInURL) {
-		res.redirect(`https://equityeyes.netlify.app/dashboard?token=${token}`);
+		res.redirect(`${uri}/dashboard?token=${token}`);
 	} else {
-		res.redirect('https://equityeyes.netlify.app/dashboard');
+		res.redirect(`${uri}/dashboard`);
 	}
 };
 
@@ -69,31 +80,27 @@ router.get('/github', (req, res, next) => {
 router.get(
 	'/github/callback',
 	(req, res, next) => {
-		passport.authenticate(
-			'github',
-			{ failureRedirect: 'https://equityeyes.netlify.app/login-failed' },
-			(err, user, info) => {
+		passport.authenticate('github', { failureRedirect: `${$uri}/login-failed` }, (err, user, info) => {
+			if (err) {
+				// Handle unexpected errors
+				console.error(err);
+				return res.status(500).json({ error: 'Internal Server Error' });
+			}
+
+			if (!user) {
+				// Handle authentication failure
+				return res.status(401).json({ error: 'Authentication failed', info });
+			}
+
+			// Handle successful authentication
+			req.logIn(user, (err) => {
 				if (err) {
-					// Handle unexpected errors
 					console.error(err);
 					return res.status(500).json({ error: 'Internal Server Error' });
 				}
-
-				if (!user) {
-					// Handle authentication failure
-					return res.status(401).json({ error: 'Authentication failed', info });
-				}
-
-				// Handle successful authentication
-				req.logIn(user, (err) => {
-					if (err) {
-						console.error(err);
-						return res.status(500).json({ error: 'Internal Server Error' });
-					}
-					handleTokenGeneration(req, res, user);
-				});
-			}
-		)(req, res, next);
+				handleTokenGeneration(req, res, user);
+			});
+		})(req, res, next);
 	},
 	(req, res) => {
 		// Ensure the user is available in the request
