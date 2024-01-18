@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import DataPanel from '../components/DataPanel';
 import SettingsDrawer from '../components/SettingsDrawer';
@@ -7,7 +8,7 @@ import LoginForm from '../components/UIElements/LoginForm';
 import LoadingSpinner from '../components/UIElements/LoadingSpinner';
 import TCModal from '../components/UIElements/Modal';
 
-import { getAuthToken } from '../utils/cookieUtils';
+import { getAuthToken, setAuthToken } from '../utils/cookieUtils';
 
 const Dashboard = () => {
 	//User states
@@ -25,6 +26,10 @@ const Dashboard = () => {
 
 	//Loader states
 	const [loadText, setLoadText] = useState('Fetching data');
+
+	const location = useLocation();
+	const searchParams = new URLSearchParams(location.search);
+	const urlToken = searchParams.get('token');
 
 	const getUserId = async () => {
 		try {
@@ -45,6 +50,18 @@ const Dashboard = () => {
 		}
 		return null;
 	};
+
+	useEffect(() => {
+		// Check if there is a token in the URL
+		if (urlToken) {
+			// Set the token in the cookie
+			setAuthToken(urlToken);
+
+			// Remove the token from the URL to avoid exposing it in the browser history
+			window.history.replaceState({}, document.title, location.pathname);
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [urlToken, location.search]);
 
 	useEffect(() => {
 		// Check if function is already running
