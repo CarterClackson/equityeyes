@@ -24,10 +24,7 @@ passport.use(
 		{
 			clientID: process.env.GOOGLE_CLIENT_ID,
 			clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-			callbackURL:
-				process.env.NODE_ENV === 'production'
-					? 'https://equityeyes.azurewebsites.net/auth/google/callback/'
-					: 'http://localhost:3000/auth/google/callback/',
+			callbackURL: 'https://equityeyes.azurewebsites.net/auth/google/callback/',
 		},
 		async (accessToken, refreshToken, profile, done) => {
 			try {
@@ -75,10 +72,7 @@ passport.use(
 		{
 			clientID: process.env.GITHUB_CLIENT_ID,
 			clientSecret: process.env.GITHUB_CLIENT_SECRET,
-			callbackURL:
-				process.env.NODE_ENV === 'production'
-					? 'https://equityeyes.azurewebsites.net/auth/github/callback/'
-					: 'http://localhost:3000/auth/github/callback/',
+			callbackURL: 'https://equityeyes.azurewebsites.net/auth/github/callback',
 		},
 		async (accessToken, refreshToken, profile, done) => {
 			try {

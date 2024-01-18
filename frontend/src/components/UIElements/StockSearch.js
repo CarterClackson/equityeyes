@@ -95,7 +95,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 		return parts.map((part, index) =>
 			regex.test(part) ? (
 				<strong
-					className="font-bold text-yellow-300"
+					className='font-bold text-yellow-300'
 					key={index}
 				>
 					{part}
@@ -107,29 +107,30 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 	};
 
 	return (
-		<div className="relative search-bar flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4">
+		<div className='relative search-bar flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4'>
 			<input
-				type="text"
-				placeholder="Search stocks..."
-				name="search"
+				type='text'
+				placeholder='Search stocks...'
+				autocomplete='off'
+				name='search'
 				value={searchQuery}
 				onChange={(e) => setSearchQuery(e.target.value)}
-				className="text-black w-full px-4 py-3 mb-1 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
+				className='text-black w-full px-4 py-3 mb-1 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700'
 			/>
 			<span
-				className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3"
+				className='absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3'
 				onClick={() => onShowSearch()}
 			>
-				<i className="fas fa-solid fa-x"></i>
+				<i className='fas fa-solid fa-x'></i>
 			</span>
 			{searchQuery.trim() !== '' && (
-				<ul className="mt-2 max-h-60 overflow-y-scroll overflow-x-clip">
+				<ul className='mt-2 max-h-60 overflow-y-scroll overflow-x-clip'>
 					{filteredResults.length > 0 ? (
 						filteredResults.map((result) => (
 							<li
 								key={result.symbol}
 								onClick={() => loadDetailsView(result.symbol)}
-								className="flex items-center justify-between w-fit text-zinc-50 text-lg py-1 px-4 ml-2 rounded-lg border-2 border-transparent hover:border-emerald-700 transition-all cursor-pointer"
+								className='flex items-center justify-between w-fit text-zinc-50 text-lg py-1 px-4 ml-2 rounded-lg border-2 border-transparent hover:border-emerald-700 transition-all cursor-pointer'
 							>
 								<div>
 									{boldSearchTerm(result.symbol, searchQuery)} - {boldSearchTerm(result.name, searchQuery)}
@@ -144,18 +145,18 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 								>
 									{isStockSaved(result) ? (
 										<>
-											Saved <i className="fas fa-thin fa-check text-sm"></i>
+											Saved <i className='fas fa-thin fa-check text-sm'></i>
 										</>
 									) : (
 										<>
-											Save <i className="fas fa-thin fa-plus text-sm"></i>
+											Save <i className='fas fa-thin fa-plus text-sm'></i>
 										</>
 									)}
 								</button>
 							</li>
 						))
 					) : (
-						<li className="w-full text-zinc-50 text-lg ml-5 mt-4 rounded-lg border-2 border-transparent">
+						<li className='w-full text-zinc-50 text-lg ml-5 mt-4 rounded-lg border-2 border-transparent'>
 							No results found, try updating your saved markets.
 						</li>
 					)}

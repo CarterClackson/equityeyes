@@ -22,7 +22,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const corsOptions = {
-	origin: process.env.NODE_ENV === 'production' ? 'https://equityeyes.netlify.app' : 'http://localhost:3005',
+	origin: 'https://equityeyes.netlify.app',
 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 	credentials: true,
 	optionsSuccessStatus: 204,
