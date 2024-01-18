@@ -21,17 +21,17 @@ const stocksRoutes = require('./routes/stocksRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Define middleware to parse JSON requests
-app.use(express.json());
-
 const corsOptions = {
-	origin: 'http://localhost:3005',
+	origin: 'https://equityeyes.netlify.app',
 	methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
 	credentials: true,
 	optionsSuccessStatus: 204,
 };
 
 app.use(cors(corsOptions));
+
+// Define middleware to parse JSON requests
+app.use(express.json());
 
 //Passport middleware
 app.use(session({ secret: secretKey, resave: true, saveUninitialized: true }));
