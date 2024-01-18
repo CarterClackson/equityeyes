@@ -17,7 +17,11 @@ const handleTokenGeneration = (req, res, user) => {
 	res.cookie('authToken', token, {
 		maxAge: 7 * 24 * 60 * 60 * 1000,
 	});
-	res.redirect('http://localhost:3005/dashboard');
+	res.redirect(
+		process.env.NODE_ENV === 'production'
+			? 'https://equityeyes.netlify.app/dashboard'
+			: 'http://localhost:3005/dashboard'
+	);
 };
 
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
@@ -56,27 +60,36 @@ router.get('/github', passport.authenticate('github'));
 router.get(
 	'/github/callback',
 	(req, res, next) => {
-		passport.authenticate('github', { failureRedirect: 'http://localhost:3005/login-failed' }, (err, user, info) => {
-			if (err) {
-				// Handle unexpected errors
-				console.error(err);
-				return res.status(500).json({ error: 'Internal Server Error' });
-			}
-
-			if (!user) {
-				// Handle authentication failure
-				return res.status(401).json({ error: 'Authentication failed', info });
-			}
-
-			// Handle successful authentication
-			req.logIn(user, (err) => {
+		passport.authenticate(
+			'github',
+			{
+				failureRedirect:
+					process.env.NODE_ENV === 'production'
+						? 'https://equityeyes.netlify.app/login-failed'
+						: 'http://localhost:3005/login-failed',
+			},
+			(err, user, info) => {
 				if (err) {
+					// Handle unexpected errors
 					console.error(err);
 					return res.status(500).json({ error: 'Internal Server Error' });
 				}
-				handleTokenGeneration(req, res, user);
-			});
-		})(req, res, next);
+
+				if (!user) {
+					// Handle authentication failure
+					return res.status(401).json({ error: 'Authentication failed', info });
+				}
+
+				// Handle successful authentication
+				req.logIn(user, (err) => {
+					if (err) {
+						console.error(err);
+						return res.status(500).json({ error: 'Internal Server Error' });
+					}
+					handleTokenGeneration(req, res, user);
+				});
+			}
+		)(req, res, next);
 	},
 	(req, res) => {
 		// Ensure the user is available in the request
