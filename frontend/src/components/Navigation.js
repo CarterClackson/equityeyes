@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import handleLogout from '../utils/logoutUtils';
 
@@ -10,16 +10,20 @@ import '../styles/Navigation.css';
 const Nav = (props) => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+	const location = useLocation();
+	const searchParams = new URLSearchParams(location.search);
+	const urlToken = searchParams.get('token');
+
 	useEffect(() => {
 		// Check for the existence of the authentication token from the backend
 		const userToken = getAuthToken();
 
-		if (userToken) {
+		if (userToken || urlToken) {
 			setIsLoggedIn(true);
 		} else {
 			setIsLoggedIn(false);
 		}
-	}, [getAuthToken()]);
+	}, [urlToken]);
 
 	// Callback function to update isLoggedIn state
 	const updateIsLoggedIn = () => {
@@ -27,7 +31,10 @@ const Nav = (props) => {
 		window.location.href = '/login';
 	};
 
-	const authNavItems = [{ label: 'Dashboard', to: '/dashboard' }];
+	const authNavItems = [
+		{ label: 'Dashboard', to: '/dashboard' },
+		// Add more items as needed
+	];
 
 	return (
 		<nav className='fixed w-full z-20 top-0 bg-gradient-to-bl from-emerald-950 to-emerald-800 drop-shadow-md p-4 flex justify-between items-center shadow-md'>
