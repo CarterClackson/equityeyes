@@ -17,10 +17,20 @@ const handleTokenGeneration = (req, res, user) => {
 	res.cookie('authToken', token, {
 		maxAge: 7 * 24 * 60 * 60 * 1000,
 	});
-	res.redirect('https://equityeyes.netlify.app/dashboard');
+
+	const shouldIncludeTokenInURL = req.authStrategy === 'google' || req.authStrategy === 'github';
+
+	if (!shouldIncludeTokenInURL) {
+		res.redirect(`https://equityeyes.netlify.app/dashboard?token=${token}`);
+	} else {
+		res.redirect('https://equityeyes.netlify.app/dashboard');
+	}
 };
 
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', (req, res, next) => {
+	req.authStrategy = 'google';
+	passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+});
 
 router.get(
 	'/google/callback',
@@ -51,7 +61,10 @@ router.get(
 	}
 );
 
-router.get('/github', passport.authenticate('github'));
+router.get('/github', (req, res, next) => {
+	req.authStrategy = 'github';
+	passport.authenticate('github')(req, res, next);
+});
 
 router.get(
 	'/github/callback',
