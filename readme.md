@@ -1,6 +1,6 @@
 # equityEyes
 
-A personalized and customizable stock analytics application. It is hosted on Netlify [here](https://google.ca)
+A personalized and customizable stock analytics application. It is hosted on Netlify [here](https://google.ca) and relies on the free tier for Azure App Services for the backend server so it may take longer than expected to spin up on the first request.
 
 ## Frontend
 
