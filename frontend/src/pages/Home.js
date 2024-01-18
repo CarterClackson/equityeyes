@@ -12,6 +12,8 @@ const HomePage = () => {
 	const [showSettings, setShowSettings] = useState(false);
 	const [userID, setUserID] = useState('');
 
+	console.log(getAuthToken());
+
 	const getUserId = async () => {
 		try {
 			const response = await fetch(process.env.REACT_APP_BACKEND_URL + 'user/id', {
