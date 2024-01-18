@@ -19,7 +19,7 @@ const Nav = (props) => {
 		} else {
 			setIsLoggedIn(false);
 		}
-	}, []);
+	}, [getAuthToken()]);
 
 	// Callback function to update isLoggedIn state
 	const updateIsLoggedIn = () => {
@@ -27,29 +27,26 @@ const Nav = (props) => {
 		window.location.href = '/login';
 	};
 
-	const authNavItems = [
-		{ label: 'Dashboard', to: '/dashboard' },
-		// Add more items as needed
-	];
+	const authNavItems = [{ label: 'Dashboard', to: '/dashboard' }];
 
 	return (
-		<nav className="fixed w-full z-20 top-0 bg-gradient-to-bl from-emerald-950 to-emerald-800 drop-shadow-md p-4 flex justify-between items-center shadow-md">
-			<div className="text-white font-bold text-lg">
-				<a href="/">
+		<nav className='fixed w-full z-20 top-0 bg-gradient-to-bl from-emerald-950 to-emerald-800 drop-shadow-md p-4 flex justify-between items-center shadow-md'>
+			<div className='text-white font-bold text-lg'>
+				<a href='/'>
 					<img
 						src={process.env.PUBLIC_URL + '/assets/images/equityEyes-Logo.png'}
-						alt="equityEyes Logo"
-						className="h-8 mr-2 inline"
+						alt='equityEyes Logo'
+						className='h-8 mr-2 inline'
 					/>
 				</a>
 			</div>
-			<ul className="flex items-center">
+			<ul className='flex items-center'>
 				{isLoggedIn &&
 					authNavItems.map((item, index) => (
 						<li key={index}>
 							<Link
 								to={item.to}
-								className="text-zinc-50 font-medium px-4 py-2 hover:text-gray-300 transition-all"
+								className='text-zinc-50 font-medium px-4 py-2 hover:text-gray-300 transition-all'
 							>
 								{item.label}
 							</Link>
@@ -59,7 +56,7 @@ const Nav = (props) => {
 					<>
 						<li>
 							<button
-								className="text-white font-medium px-4 py-2 hover:text-gray-300 transition-all"
+								className='text-white font-medium px-4 py-2 hover:text-gray-300 transition-all'
 								onClick={() => props.showSettings()}
 							>
 								Settings
@@ -67,7 +64,7 @@ const Nav = (props) => {
 						</li>
 						<li>
 							<button
-								className="text-white font-medium px-4 py-2 hover:text-gray-300 transition-all"
+								className='text-white font-medium px-4 py-2 hover:text-gray-300 transition-all'
 								onClick={(e) => handleLogout(e, updateIsLoggedIn)}
 							>
 								Logout
@@ -78,14 +75,14 @@ const Nav = (props) => {
 				{!isLoggedIn && (
 					<li>
 						<Link
-							to="/login"
-							className="text-zinc-50 font-medium px-4 py-2 hover:text-gray-300 transition-all"
+							to='/login'
+							className='text-zinc-50 font-medium px-4 py-2 hover:text-gray-300 transition-all'
 						>
 							Login
 						</Link>
 						<Link
-							to="/"
-							className="text-zinc-50 border-2 border-zinc-50 rounded-full ml-2 px-4 py-2 font-medium hover:text-emerald-900 hover:bg-zinc-50 hover:border-emerald-900 transition-all"
+							to='/'
+							className='text-zinc-50 border-2 border-zinc-50 rounded-full ml-2 px-4 py-2 font-medium hover:text-emerald-900 hover:bg-zinc-50 hover:border-emerald-900 transition-all'
 						>
 							Signup
 						</Link>
