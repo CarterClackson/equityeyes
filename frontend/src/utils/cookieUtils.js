@@ -6,11 +6,18 @@ const COOKIE_NAMES = {
 };
 
 const setAuthToken = (token, expirationDays = 7) => {
-	Cookies.set(COOKIE_NAMES.AUTH_TOKEN, token, { expires: expirationDays });
+	Cookies.set(COOKIE_NAMES.AUTH_TOKEN, token, {
+		expires: expirationDays,
+		domain: 'https://equityeyes.netlify.app',
+		path: '/',
+		secure: true,
+	});
+	console.log('AuthToken set:', token);
 };
 
 const getAuthToken = () => {
 	const token = Cookies.get(COOKIE_NAMES.AUTH_TOKEN);
+	console.log('AuthToken retrieved:', token);
 	return token || null;
 };
 
