@@ -111,7 +111,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 			<input
 				type='text'
 				placeholder='Search stocks...'
-				autocomplete='off'
+				autoComplete='off'
 				name='search'
 				value={searchQuery}
 				onChange={(e) => setSearchQuery(e.target.value)}

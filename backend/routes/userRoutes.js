@@ -213,40 +213,14 @@ router.post('/stocks/add', verifyToken, async (req, res) => {
 	let stockData;
 
 	try {
-		const currentDate = moment().tz('America/New_York');
-
-		// Check if it's Sunday or Monday
-		if (currentDate.day() === 0) {
-			// Sunday, fetch data from Friday
-			currentDate.subtract(2, 'days');
-		} else if (currentDate.day() === 1) {
-			// Monday, fetch data from Friday
-			currentDate.subtract(4, 'days');
-		} else {
-			// Fetch data from yesterday for all other days
-			currentDate.subtract(1, 'days');
-		}
-		// Check if it's before 9:30 AM and not Sunday or Monday
-		if (currentDate.hour() < 11) {
-			const today = moment().tz('America/New_York');
-			if (today.day() === 2) {
-				currentDate.subtract(3, 'days');
-			} else {
-				currentDate.subtract(1, 'days');
-			}
-			// Adjust the date to be another day back
-		}
-
-		const formattedDate = currentDate.format('YYYY-MM-DD');
-
-		const response = await axios.get(`${baseURL}/open-close/${savedStockTicker}/${formattedDate}`, {
+		const response = await axios.get(`https://api.polygon.io/v2/aggs/ticker/${savedStockTicker}/prev`, {
 			params: {
 				adjusted: true,
 				apiKey: apiKey,
 			},
 		});
-		stockData = response.data;
-		savedStockPrice = response.data.close;
+		stockData = response.data.results[0];
+		savedStockPrice = response.data.results[0].c;
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ error: 'Internal Server Error' });
@@ -329,40 +303,14 @@ router.get('/stocks', verifyToken, async (req, res) => {
 		const savedStocks = user.savedStocks;
 
 		if (savedStocks && savedStocks.length > 0) {
-			const currentDate = moment().tz('America/New_York');
-
-			// Check if it's Sunday or Monday
-			if (currentDate.day() === 0) {
-				// Sunday, fetch data from Friday
-				currentDate.subtract(2, 'days');
-			} else if (currentDate.day() === 1) {
-				// Monday, fetch data from Friday
-				currentDate.subtract(4, 'days');
-			} else {
-				// Fetch data from yesterday for all other days
-				currentDate.subtract(1, 'days');
-			}
-			// Check if it's before 9:30 AM and not Sunday or Monday
-			if (currentDate.hour() < 11) {
-				const today = moment().tz('America/New_York');
-				if (today.day() === 2) {
-					currentDate.subtract(3, 'days');
-				} else {
-					currentDate.subtract(1, 'days');
-				}
-				// Adjust the date to be another day back
-			}
-
-			const formattedDate = currentDate.format('YYYY-MM-DD');
-
 			const stockDataPromises = savedStocks.map(async (stock) => {
-				const response = await axios.get(`${baseURL}/open-close/${stock.ticker}/${formattedDate}`, {
+				const response = await axios.get(`https://api.polygon.io/v2/aggs/ticker/${stock.ticker}/prev`, {
 					params: {
 						adjusted: true,
 						apiKey: apiKey,
 					},
 				});
-				return { symbol: stock.ticker, buyInPrice: stock.buyInPrice, data: response.data };
+				return { symbol: stock.ticker, buyInPrice: stock.buyInPrice, data: response.data.results[0] };
 			});
 
 			const stockData = await Promise.all(stockDataPromises);
