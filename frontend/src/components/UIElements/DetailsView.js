@@ -36,7 +36,7 @@ const DetailsView = (props) => {
 					{expanded && tickerData.description.length > characterLimit && (
 						<span
 							onClick={toggleDescription}
-							className="show-less text-yellow-400 font-bold cursor-pointer"
+							className='show-less text-yellow-400 font-bold cursor-pointer'
 						>
 							{' '}
 							show less
@@ -52,7 +52,7 @@ const DetailsView = (props) => {
 					{`${truncatedText.slice(0, lastSpaceIndex)}`}
 					<span
 						onClick={toggleDescription}
-						className="text-yellow-400 font-bold cursor-pointer"
+						className='text-yellow-400 font-bold cursor-pointer'
 					>
 						{' '}
 						...
@@ -113,99 +113,105 @@ const DetailsView = (props) => {
 		}
 	};
 
+	const unixToFormattedData = (unix) => {
+		const date = new Date(unix);
+
+		const year = date.getFullYear();
+		const month = (date.getMonth() + 1).toString().padStart(2, '0');
+		const day = date.getDate().toString().padStart(2, '0');
+
+		const formattedDate = `${year}-${month}-${day}`;
+		return formattedDate;
+	};
+
+	const percentChange = (todayPrice, savedPrice) => {
+		return '(' + ((todayPrice / savedPrice - 1) * 100).toFixed(2) + '%)';
+	};
+
 	return (
 		<React.Fragment>
-			<div className="relative flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4">
+			<div className='relative flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4'>
 				<span
-					className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3 cursor-pointer"
+					className='absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3 cursor-pointer'
 					onClick={() => props.onShowDetails()}
 				>
-					<i class="fas fa-solid fa-x"></i>
+					<i class='fas fa-solid fa-x'></i>
 				</span>
-				<h1 className="text-2xl font-bold">
+				<h1 className='text-2xl font-bold'>
 					<a
 						href={tickerData.homepage_url}
-						rel="noreferrer"
-						target="_blank"
-						className="font-extrabold text-yellow-400"
+						rel='noreferrer'
+						target='_blank'
+						className='font-extrabold text-yellow-400'
 					>
 						{tickerData.ticker}
 					</a>{' '}
 					- {tickerData.name}
 				</h1>
-				<p className="leading-5">{renderDescription()}</p>
+				<p className='leading-5'>{renderDescription()}</p>
 				<StockChart ticker={tickerData.ticker} />
-				<div className="flex">
-					<div className="flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2">
-						<h3 className="text-xl font-bold text-zinc-50 text-center">Daily High</h3>
-						<span className="text-md font-light text-zinc-500 text-center">{stockData.from}</span>
-						<span
-							className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.high, buyInPrice)} `}
-						>
-							{stockData.high}{' '}
-							{stockData.high > buyInPrice ? (
-								<i className="fas fa-sharp fa-solid fa-arrow-up"></i>
+				<div className='flex'>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center'>Daily High</h3>
+						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
+						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.h, buyInPrice)} `}>
+							{stockData.h > buyInPrice ? (
+								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
-								<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
-							)}
+								<i className='fas fa-sharp fa-solid fa-arrow-down'></i>
+							)}{' '}
+							{stockData.h} <span className='text-base'>{percentChange(stockData.h, buyInPrice)}</span>{' '}
 						</span>
 					</div>
-					<div className="flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2">
-						<h3 className="text-xl font-bold text-zinc-50 text-center">Daily Low</h3>
-						<span className="text-md font-light text-zinc-500 text-center">{stockData.from}</span>
-						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.low, buyInPrice)} `}>
-							{stockData.low}{' '}
-							{stockData.low > buyInPrice ? (
-								<i className="fas fa-sharp fa-solid fa-arrow-up"></i>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center'>Daily Low</h3>
+						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
+						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.l, buyInPrice)} `}>
+							{stockData.l > buyInPrice ? (
+								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
-								<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
-							)}
+								<i className='fas fa-sharp fa-solid fa-arrow-down'></i>
+							)}{' '}
+							{stockData.l} <span className='text-base'>{percentChange(stockData.l, buyInPrice)}</span>{' '}
 						</span>
 					</div>
-					<div className="flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2">
-						<h3 className="text-xl font-bold text-zinc-50 text-center">Daily Open</h3>
-						<span className="text-md font-light text-zinc-500 text-center">{stockData.from}</span>
-						<span
-							className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.open, buyInPrice)} `}
-						>
-							{stockData.open}{' '}
-							{stockData.open > buyInPrice ? (
-								<i className="fas fa-sharp fa-solid fa-arrow-up"></i>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center'>Daily Open</h3>
+						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
+						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.o, buyInPrice)} `}>
+							{stockData.o > buyInPrice ? (
+								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
-								<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
-							)}
+								<i className='fas fa-sharp fa-solid fa-arrow-down'></i>
+							)}{' '}
+							{stockData.o} <span className='text-base'>{percentChange(stockData.o, buyInPrice)}</span>{' '}
 						</span>
 					</div>
-					<div className="flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2">
-						<h3 className="text-xl font-bold text-zinc-50 text-center">Daily Pre-Market</h3>
-						<span className="text-md font-light text-zinc-500 text-center">{stockData.from}</span>
-						<span
-							className={`text-2xl font-bold text-green-500 text-center ${arrowColor(
-								stockData.preMarket,
-								buyInPrice
-							)} `}
-						>
-							{stockData.preMarket}{' '}
-							{stockData.preMarket > buyInPrice ? (
-								<i className="fas fa-sharp fa-solid fa-arrow-up"></i>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center'>Previous Close</h3>
+						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
+						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.c, buyInPrice)} `}>
+							{stockData.c > buyInPrice ? (
+								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
-								<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
-							)}
+								<i className='fas fa-sharp fa-solid fa-arrow-down'></i>
+							)}{' '}
+							{stockData.c} <span className='text-base'>{percentChange(stockData.c, buyInPrice)}</span>{' '}
 						</span>
 					</div>
 				</div>
-				<div className="flex flex-col items-center content-center justify-center">
+				<div className='flex flex-col items-center content-center justify-center'>
 					<button
-						type="button"
+						type='button'
 						onClick={() => {
 							fetchNews(`${tickerData.ticker}`);
 							props.onShowNews(true);
 						}}
-						className="bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-48 py-3 px-4 my-8 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+						className='bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-48 py-3 px-4 my-8 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all'
 					>
 						View News
 					</button>
-					<div className="flex grid-rows-1">
+					<div className='flex grid-rows-1'>
 						{isLoading && (
 							<LoadingSpinner
 								asSearchOverlay
@@ -216,20 +222,20 @@ const DetailsView = (props) => {
 							stockNews.map((stock, index) => (
 								<div
 									key={index}
-									className="flex flex-col items-center min-h-48 p-4 mx-2 border-4 border-emerald-900 rounded-lg w-1/3"
+									className='flex flex-col items-center min-h-48 p-4 mx-2 border-4 border-emerald-900 rounded-lg w-1/3'
 								>
-									<h4 className="self-start text-yellow-400 text-xl font-bold">
+									<h4 className='self-start text-yellow-400 text-xl font-bold'>
 										<a href={`${stock.article_url}`}>{stock.title.slice(0, 50) + '...'}</a>
 									</h4>
-									<span className="self-start mt-1 text-sm text-zinc-300">{stock.author}</span>
-									<p className="text-zinc-50 mt-4 mb-8">
+									<span className='self-start mt-1 text-sm text-zinc-300'>{stock.author}</span>
+									<p className='text-zinc-50 mt-4 mb-8'>
 										{stock.description.slice(0, 250) + (stock.description.length > 250 ? '...' : '')}
 									</p>
 									<a
 										href={`${stock.article_url}`}
-										target="_blank"
-										rel="noreferrer"
-										className="bg-emerald-900 border-2 border-emerald-900 text-white text-center font-bold w-48 py-3 px-4 mt-auto rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+										target='_blank'
+										rel='noreferrer'
+										className='bg-emerald-900 border-2 border-emerald-900 text-white text-center font-bold w-48 py-3 px-4 mt-auto rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all'
 									>
 										View Article
 									</a>

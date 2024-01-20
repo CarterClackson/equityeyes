@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { getAuthToken } from '../utils/cookieUtils';
 import '../styles/SettingsDrawer.css';
 import LoadingSpinner from './UIElements/LoadingSpinner';
@@ -105,6 +105,10 @@ const SettingsDrawer = (props) => {
 	const [savedMarkets, setSavedMarkets] = useState(userMarkets);
 	const [unsavedMarkets, setUnsavedMarkets] = useState(operatingMics || []);
 
+	const handleMarkets = () => {
+		props.changeMarkets();
+	};
+
 	const handleDropSave = async (mic) => {
 		// Add the mic to the saved list and remove it from the unsaved list
 		setSavedMarkets((prev) => [...prev, mic]);
@@ -120,6 +124,10 @@ const SettingsDrawer = (props) => {
 					add: [`${mic}`],
 				}),
 			});
+
+			if (response.ok) {
+				handleMarkets();
+			}
 
 			if (!response.ok) {
 				throw new Error('Network response not ok');
@@ -144,6 +152,10 @@ const SettingsDrawer = (props) => {
 					remove: [`${mic}`],
 				}),
 			});
+
+			if (response.ok) {
+				handleMarkets();
+			}
 
 			if (!response.ok) {
 				throw new Error('Network response not ok');
@@ -302,7 +314,10 @@ const SettingsDrawer = (props) => {
 					</form>
 					<div className='flex'>
 						<span className='text-base font-bold'>Your markets:</span>
-						<DndProvider backend={HTML5Backend}>
+						<DndProvider
+							backend={TouchBackend}
+							options={{ enableMouseEvents: true }}
+						>
 							<div style={{ display: 'flex' }}>
 								<MarketList
 									title='Saved'

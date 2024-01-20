@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import LoadingSpinner from '../UIElements/LoadingSpinner';
@@ -20,8 +20,12 @@ const LoginForm = (props) => {
 	const [generalError, setGeneralError] = useState('');
 	const [formSuccess, setFormSuccess] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
+	const [submissionStartTime, setSubmissionStartTime] = useState(0);
+	const [dbResponseText, setDbResponseText] = useState(props.loadText);
 
 	const handleOAuthLogin = async (provider) => {
+		setSubmissionStartTime(performance.now());
+		setIsLoading(true);
 		window.location.href = `${backendUrl}auth/${provider}`;
 	};
 
@@ -42,6 +46,7 @@ const LoginForm = (props) => {
 
 	const handleSubmitLogin = async (e) => {
 		e.preventDefault();
+		setSubmissionStartTime(performance.now());
 		setIsLoading(true);
 
 		const errors = {};
@@ -95,6 +100,7 @@ const LoginForm = (props) => {
 
 	const handleSubmitSignup = async (e) => {
 		e.preventDefault();
+		setSubmissionStartTime(performance.now());
 		setIsLoading(true);
 
 		const errors = {};
@@ -164,80 +170,97 @@ const LoginForm = (props) => {
 		}
 	};
 
+	useEffect(() => {
+		const checkElapsedTime = () => {
+			const elapsedTime = performance.now() - submissionStartTime;
+
+			if (elapsedTime > 3000) {
+				setDbResponseText('Please wait, this may take a moment to spin up the database...');
+			}
+		};
+
+		if (submissionStartTime > 0) {
+			const intervalId = setInterval(checkElapsedTime, 1000);
+			return () => clearInterval(intervalId);
+		}
+
+		return undefined;
+	}, [submissionStartTime]);
+
 	return (
 		<React.Fragment>
-			<div className="flex items-center">
-				<div className="mr-8">
+			<div className='flex items-center'>
+				<div className='mr-8'>
 					<button
 						onClick={() => handleOAuthLogin('google')}
-						className="flex items-center group  bg-emerald-900 border-2 border-emerald-900 text-white font-bold py-2 px-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+						className='flex items-center group  bg-emerald-900 border-2 border-emerald-900 text-white font-bold py-2 px-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all'
 					>
 						{props.isSignup ? 'Sign up' : 'Login'} with{' '}
-						<i className="fab fa-google text-white text-2xl ml-2 group-hover:text-emerald-900"></i>
+						<i className='fab fa-google text-white text-2xl ml-2 group-hover:text-emerald-900'></i>
 					</button>
 				</div>
-				<div className="">
+				<div className=''>
 					<button
 						onClick={() => handleOAuthLogin('github')}
-						className="flex items-center group bg-emerald-900 border-2 border-emerald-900 text-white font-bold py-2 px-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-700 hover:border-emerald-900 transition-all"
+						className='flex items-center group bg-emerald-900 border-2 border-emerald-900 text-white font-bold py-2 px-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-700 hover:border-emerald-900 transition-all'
 					>
 						{props.isSignup ? 'Sign up' : 'Login'} with{' '}
-						<i className="fab fa-github text-white text-2xl ml-2 group-hover:text-emerald-900"></i>
+						<i className='fab fa-github text-white text-2xl ml-2 group-hover:text-emerald-900'></i>
 					</button>
 				</div>
 			</div>
-			<span className="text-white/90 py-4">-or-</span>
-			{formSuccess && <div className="success">{formSuccess}</div>}
-			{generalError && <span className="form-error py-2 px-5 mt-2 bg-red-600 font-medium">{generalError}</span>}
+			<span className='text-white/90 py-4'>-or-</span>
+			{formSuccess && <div className='success'>{formSuccess}</div>}
+			{generalError && <span className='form-error py-2 px-5 mt-2 bg-red-600 font-medium'>{generalError}</span>}
 			{!formSuccess && (
 				<form
 					onSubmit={props.isSignup ? handleSubmitSignup : handleSubmitLogin}
-					className="flex flex-col items-center max-w-md xl:w-1/4 2xl:w-1/5 mx-auto"
+					className='flex flex-col items-center max-w-md xl:w-1/4 2xl:w-1/5 mx-auto'
 				>
 					{isLoading && (
 						<LoadingSpinner
 							asOverlay
-							loadText={props.loadText}
+							loadText={dbResponseText}
 						/>
 					)}
 					{props.isSignup && (
 						<input
-							type="text"
-							name="name"
-							placeholder="Name"
-							className="form-input text-black w-full px-4 py-3 mt-2 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
+							type='text'
+							name='name'
+							placeholder='Name'
+							className='form-input text-black w-full px-4 py-3 mt-2 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700'
 							value={formData.name}
 							onChange={handleChange}
 						/>
 					)}
 					{formErrors.name && (
-						<div className="field-error py-2 px-5 mt-2 mb-4 bg-red-600 font-medium">{formErrors.name}</div>
+						<div className='field-error py-2 px-5 mt-2 mb-4 bg-red-600 font-medium'>{formErrors.name}</div>
 					)}
 					<input
-						type="email"
-						name="email"
-						placeholder="Email"
-						className="form-input text-black w-full px-4 py-3 mt-2 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
+						type='email'
+						name='email'
+						placeholder='Email'
+						className='form-input text-black w-full px-4 py-3 mt-2 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700'
 						value={formData.email}
 						onChange={handleChange}
 					/>
 					{formErrors.email && (
-						<div className="field-error py-2 px-5 mt-2 mb-4 bg-red-600 font-medium">{formErrors.email}</div>
+						<div className='field-error py-2 px-5 mt-2 mb-4 bg-red-600 font-medium'>{formErrors.email}</div>
 					)}
 					<input
-						type="password"
-						name="password"
-						placeholder="Password"
-						className="form-input text-black w-full px-4 py-3 mt-2 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700"
+						type='password'
+						name='password'
+						placeholder='Password'
+						className='form-input text-black w-full px-4 py-3 mt-2 rounded-full focus:border-transparent focus:ring focus:ring-emerald-700'
 						value={formData.password}
 						onChange={handleChange}
 					/>
 					{formErrors.password && (
-						<div className="field-error py-2 px-5 mt-2 mb-4 bg-red-600 font-medium">{formErrors.password}</div>
+						<div className='field-error py-2 px-5 mt-2 mb-4 bg-red-600 font-medium'>{formErrors.password}</div>
 					)}
 					<button
-						type="submit"
-						className="bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-1/3 py-3 px-4 mt-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all"
+						type='submit'
+						className='bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-1/3 py-3 px-4 mt-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all'
 					>
 						{props.isSignup ? 'Sign up' : 'Login'}
 					</button>

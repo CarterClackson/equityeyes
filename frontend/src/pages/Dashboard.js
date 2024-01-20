@@ -15,6 +15,7 @@ const Dashboard = () => {
 	const [userData, setUserData] = useState([]);
 	const [userID, setUserID] = useState('');
 	const [tempUserData, setTempUserData] = useState(null);
+	const [marketData, setMarketData] = useState({});
 
 	// Render states
 	const [isLoading, setIsLoading] = useState(false);
@@ -192,6 +193,27 @@ const Dashboard = () => {
 		setShowSettings((prevState) => !prevState);
 	};
 
+	const handleMarketsChange = async () => {
+		try {
+			const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}stocks`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${getAuthToken()}`,
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+
+			const data = await response.json();
+			setMarketData(data);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	return (
 		<React.Fragment>
 			<Nav showSettings={() => handleShowSettings()} />
@@ -217,6 +239,7 @@ const Dashboard = () => {
 					isLoading={handleIsLoading}
 					setUserData={setUserData}
 					getUserId={getUserId}
+					updatedMarketData={marketData}
 				/>
 			)}
 			{!userID && (
@@ -234,6 +257,9 @@ const Dashboard = () => {
 					className={showSettings ? 'open' : ''}
 					showSettings={() => {
 						handleShowSettings();
+					}}
+					changeMarkets={() => {
+						handleMarketsChange();
 					}}
 				/>
 			)}

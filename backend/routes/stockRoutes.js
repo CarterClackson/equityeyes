@@ -60,40 +60,14 @@ router.get('/:symbol/news', async (req, res) => {
 router.get('/:symbol', async (req, res) => {
 	const symbol = req.params.symbol.toUpperCase();
 	try {
-		const currentDate = moment().tz('America/New_York');
-
-		// Check if it's Sunday or Monday
-		if (currentDate.day() === 0) {
-			// Sunday, fetch data from Friday
-			currentDate.subtract(2, 'days');
-		} else if (currentDate.day() === 1) {
-			// Monday, fetch data from Friday
-			currentDate.subtract(4, 'days');
-		} else {
-			// Fetch data from yesterday for all other days
-			currentDate.subtract(1, 'days');
-		}
-		// Check if it's before 9:30 AM and not Sunday or Monday
-		if (currentDate.hour() < 11) {
-			const today = moment().tz('America/New_York');
-			if (today.day() === 2) {
-				currentDate.subtract(3, 'days');
-			} else {
-				currentDate.subtract(1, 'days');
-			}
-			// Adjust the date to be another day back
-		}
-
-		const formattedDate = currentDate.format('YYYY-MM-DD');
-
 		// Fetch stock details
-		const stockResponse = await axios.get(`${baseURL}/open-close/${symbol}/${formattedDate}`, {
+		const stockResponse = await axios.get(`https://api.polygon.io/v2/aggs/ticker/${symbol}/prev`, {
 			params: {
 				adjusted: true,
 				apiKey: apiKey,
 			},
 		});
-		const stockDetails = stockResponse.data;
+		const stockDetails = stockResponse.data.results[0];
 
 		//Fetch ticker details
 		const tickerResponse = await axios.get(`https://api.polygon.io/v3/reference/tickers/${symbol}`, {

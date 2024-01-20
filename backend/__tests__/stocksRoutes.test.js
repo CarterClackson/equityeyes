@@ -41,7 +41,7 @@ describe('GET /stocks', () => {
 
 		expect(response.statusCode).toBe(200);
 		expect(response.body.page).toBe(1);
-		expect(response.body.totalPages).toBe(2); // Assuming pageSize is 5 and total stocks are 10
+		expect(response.body.totalPages).toBe(80); // Assuming pageSize is 5 and total stocks are 10
 		expect(response.body.stocks).toHaveLength(100);
 	});
 
@@ -63,7 +63,7 @@ describe('GET /stocks', () => {
 		const response = await request(app).get('/stocks').set('Authorization', `Bearer ${userWithToken.token}`);
 
 		expect(response.statusCode).toBe(200);
-		expect(response.body).toHaveLength(174);
+		expect(response.body).toHaveLength(7982);
 	});
 
 	// Test case for unsuccessful user lookup

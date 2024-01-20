@@ -69,6 +69,10 @@ const DataPanel = (props) => {
 		}
 	};
 
+	const percentChange = (todayPrice, savedPrice) => {
+		return '(' + ((todayPrice / savedPrice - 1) * 100).toFixed(2) + '%)';
+	};
+
 	const loadDetailsView = async (stockTicker) => {
 		setIsLoading(true);
 		try {
@@ -124,62 +128,62 @@ const DataPanel = (props) => {
 
 	return (
 		<main
-			className="mt-16 p-8 bg-gradient-to-br from-zinc-950 to-zinc-900 text-zinc-50"
+			className='mt-16 p-8 bg-gradient-to-br from-zinc-950 to-zinc-900 text-zinc-50'
 			style={{ minHeight: 'inherit' }}
 		>
 			{errorResponse && (
-				<div className="bg-red-500 text-white px-4 py-2 mb-4 w-fit">
-					<i className="fas fa-solid fa-triangle-exclamation text-xl mr-2"></i> {errorResponse}
+				<div className='bg-red-500 text-white px-4 py-2 mb-4 w-fit'>
+					<i className='fas fa-solid fa-triangle-exclamation text-xl mr-2'></i> {errorResponse}
 				</div>
 			)}
-			<h1 className="text-3xl font-bold pb-4">My Stocks</h1>
-			<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+			<h1 className='text-3xl font-bold pb-4'>My Stocks</h1>
+			<div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
 				{data.map((stock, index) => (
 					<div
 						key={index}
 						onClick={() => loadDetailsView(stock.symbol)}
-						className="relative bg-emerald-900 border-4 border-transparent p-6 rounded-lg hover:border-4 hover:border-emerald-700 transition-all cursor-pointer"
+						className='relative bg-emerald-900 border-4 border-transparent p-6 rounded-lg hover:border-4 hover:border-emerald-700 transition-all cursor-pointer'
 					>
 						<span
-							className="absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3 z-10"
+							className='absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3 z-10'
 							onClick={(e) => handleRemoveStock(e, stock.symbol)}
 						>
-							<i class="fas fa-solid fa-x"></i>
+							<i class='fas fa-solid fa-x'></i>
 						</span>
-						<p className="text-xl font-semibold mb-2">{stock.symbol}</p>
-						<p className="text-zinc-50 mb-2">Saved Price: {stock.buyInPrice}</p>
-						<ul className="text-zinc-50">
+						<p className='text-xl font-semibold mb-2'>{stock.symbol}</p>
+						<p className='text-zinc-50 mb-2'>Saved Price: {stock.buyInPrice}</p>
+						<ul className='text-zinc-50'>
 							<li>
 								Open:
-								<span className={`ml-2 ${arrowColor(stock.data.open, stock.buyInPrice)}`}>
-									{stock.data.open}{' '}
-									{stock.data.open > stock.buyInPrice ? (
-										<i className="fas fa-sharp fa-solid fa-arrow-up"></i>
+								<span className={`ml-2 ${arrowColor(stock.data.o, stock.buyInPrice)}`}>
+									{stock.data.o > stock.buyInPrice ? (
+										<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 									) : (
-										<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
-									)}
+										<i className='fas fa-sharp fa-solid fa-arrow-down'></i>
+									)}{' '}
+									{stock.data.o} {percentChange(stock.data.o, stock.buyInPrice)}
 								</span>
 							</li>
 							<li>
 								High:
-								<span className={`ml-2 ${arrowColor(stock.data.high, stock.buyInPrice)}`}>
-									{stock.data.high}{' '}
-									{stock.data.high > stock.buyInPrice ? (
-										<i className="fas fa-sharp fa-solid fa-arrow-up"></i>
+								<span className={`ml-2 ${arrowColor(stock.data.h, stock.buyInPrice)}`}>
+									{stock.data.h > stock.buyInPrice ? (
+										<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 									) : (
-										<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
-									)}
+										<i className='fas fa-sharp fa-solid fa-arrow-down'></i>
+									)}{' '}
+									{stock.data.h} {percentChange(stock.data.h, stock.buyInPrice)}
 								</span>
 							</li>
 							<li>
 								Low:
-								<span className={`ml-2 ${arrowColor(stock.data.low, stock.buyInPrice)}`}>
-									{stock.data.low}{' '}
-									{stock.data.low > stock.buyInPrice ? (
-										<i className="fas fa-sharp fa-solid fa-arrow-up"></i>
+								<span className={`ml-2 ${arrowColor(stock.data.l, stock.buyInPrice)}`}>
+									{stock.data.l > stock.buyInPrice ? (
+										<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 									) : (
-										<i className="fas fa-sharp fa-solid fa-arrow-down"></i>
-									)}
+										<i className='fas fa-sharp fa-solid fa-arrow-down'></i>
+									)}{' '}
+									{stock.data.l} {percentChange(stock.data.l, stock.buyInPrice)}
 								</span>
 							</li>
 						</ul>
@@ -192,7 +196,7 @@ const DataPanel = (props) => {
 							showSearch ? 'hidden' : ''
 						}`}
 					>
-						<i className="fas fa-sharp fa-plus-circle text-3xl text-emerald-900 group-hover:text-zinc-50 transition-all"></i>
+						<i className='fas fa-sharp fa-plus-circle text-3xl text-emerald-900 group-hover:text-zinc-50 transition-all'></i>
 					</div>
 				)}
 			</div>
@@ -204,6 +208,7 @@ const DataPanel = (props) => {
 					loadDetailsView={loadDetailsView}
 					onForceUpdate={props.needsUpdate}
 					onShowSearch={handleResetShowSearch}
+					marketData={props.updatedMarketData}
 				/>
 			)}
 			{showDetails && (
@@ -211,6 +216,7 @@ const DataPanel = (props) => {
 					data={detailsData}
 					onShowDetails={() => handleResetDetails()}
 					onShowNews={(value) => handleResetNews(value)}
+					percentChange={() => percentChange()}
 					showNews={showNews}
 					buyInPrice={data}
 				/>
@@ -218,7 +224,7 @@ const DataPanel = (props) => {
 			{isLoading && (
 				<LoadingSpinner
 					asOverlay
-					loadText="Fetching data..."
+					loadText='Fetching data...'
 				/>
 			)}
 		</main>
