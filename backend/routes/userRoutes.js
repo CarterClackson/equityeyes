@@ -11,12 +11,20 @@ const verifyToken = require('../middleware/authenticate');
 
 const router = express.Router();
 
+require('dotenv').config();
+
 const baseURL = 'https://api.polygon.io/v1';
 const apiKey = process.env.POLYGON_API_KEY;
 const secretKey = process.env.AUTH_SECRET_KEY;
 
+const environment = process.env.NODE_ENV || 'dev';
+
+if (environment === 'production') {
+} else {
+	const { restart } = require('nodemon');
+}
+
 const User = require('../models/user');
-const { restart } = require('nodemon');
 
 const MAX_REQUESTS_PER_MINUTE = 5;
 const delayMS = 1000 * (60 / MAX_REQUESTS_PER_MINUTE);

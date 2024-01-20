@@ -15,12 +15,12 @@ if (environment === 'production') {
 	uri = process.env.FRONTEND_URL_PROD;
 } else {
 	uri = process.env.FRONTEND_URL_DEV;
+	const { restart } = require('nodemon');
 }
 
 const secretKey = process.env.AUTH_SECRET_KEY;
 
 const User = require('../models/user');
-const { restart } = require('nodemon');
 
 const handleTokenGeneration = (req, res, user) => {
 	const token = jwt.sign({ userId: user.id, email: user.email }, secretKey, { expiresIn: '7d' });
@@ -80,7 +80,7 @@ router.get('/github', (req, res, next) => {
 router.get(
 	'/github/callback',
 	(req, res, next) => {
-		passport.authenticate('github', { failureRedirect: `${$uri}/login-failed` }, (err, user, info) => {
+		passport.authenticate('github', { failureRedirect: `${uri}/login-failed` }, (err, user, info) => {
 			if (err) {
 				// Handle unexpected errors
 				console.error(err);
