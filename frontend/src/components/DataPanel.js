@@ -208,6 +208,7 @@ const DataPanel = (props) => {
 					loadDetailsView={loadDetailsView}
 					onForceUpdate={props.needsUpdate}
 					onShowSearch={handleResetShowSearch}
+					marketData={props.updatedMarketData}
 				/>
 			)}
 			{showDetails && (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getAuthToken } from '../../utils/cookieUtils';
 
-const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsView, savedStocks }) => {
+const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsView, savedStocks, marketData }) => {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [searchResults, setSearchResults] = useState([]);
 
@@ -22,7 +22,12 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 				}
 
 				const data = await response.json();
-				setSearchResults(data);
+				console.log(marketData);
+				if (Object.keys(marketData).length) {
+					setSearchResults(marketData);
+				} else {
+					setSearchResults(data);
+				}
 			} catch (error) {
 				console.log(error);
 			} finally {
@@ -30,7 +35,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 		};
 
 		fetchData();
-	}, []);
+	}, [marketData]);
 
 	// Filter results based on the searchQuery
 	const filteredResults =
@@ -157,7 +162,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 						))
 					) : (
 						<li className='w-full text-zinc-50 text-lg ml-5 mt-4 rounded-lg border-2 border-transparent'>
-							No results found, try updating your saved markets.
+							No results found, try updating your saved markets in settings.
 						</li>
 					)}
 				</ul>

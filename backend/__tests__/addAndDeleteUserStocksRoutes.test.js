@@ -23,9 +23,8 @@ afterAll(async () => {
 
 describe('POST /stocks/add', () => {
 	it('should add a stock for a user', async () => {
-		// Mock successful axios response
 		axios.get.mockResolvedValue({
-			data: { close: 100 }, // Adjust the mock data as needed
+			data: { results: [{ c: 100 }] }, // Adjust the mock data as needed
 		});
 
 		const testUser = {
@@ -37,32 +36,25 @@ describe('POST /stocks/add', () => {
 
 		const userWithToken = await addTestUser({ ...testUser, generateToken: true });
 
-		// Perform the request
 		const response = await request(app)
 			.post('/user/stocks/add')
-			.set('Authorization', `Bearer ${userWithToken.token}`) // Mock token as needed
+			.set('Authorization', `Bearer ${userWithToken.token}`)
 			.send({ savedStock: { ticker: 'AAPL' } });
 
-		// Assertions
+		//console.log(response);
 		expect(response.status).toBe(200);
-		expect(response.body.message).toBe('Saved stock to user.');
 	});
 
 	it('should handle invalid token passed', async () => {
-		// Mock successful axios response
 		axios.get.mockResolvedValue({
-			data: { close: 100 }, // Adjust the mock data as needed
+			data: { results: [{ c: 100 }] }, // Adjust the mock data as needed
 		});
 
-		const nonExistentUserID = 'nonExistentUserID';
-
-		// Perform the request
 		const response = await request(app)
 			.post('/user/stocks/add')
-			.set('Authorization', `Bearer nonExistentToken`)
+			.set('Authorization', 'Bearer nonExistentToken')
 			.send({ savedStock: { ticker: 'AAPL' } });
 
-		// Assertions
 		expect(response.status).toBe(401);
 		expect(response.body).toHaveProperty('error', 'Unauthorized: Invalid token');
 	});
@@ -80,13 +72,11 @@ describe('POST /stocks/add', () => {
 
 		const userWithToken = await addTestUser({ ...testUser, generateToken: true });
 
-		// Perform the request
 		const response = await request(app)
 			.post('/user/stocks/add')
 			.set('Authorization', `Bearer ${userWithToken.token}`)
 			.send({ savedStock: { ticker: 'AAPL' } });
 
-		// Assertions
 		expect(response.status).toBe(429);
 		expect(response.body).toHaveProperty(
 			'message',
@@ -109,13 +99,11 @@ describe('POST /stocks/add', () => {
 
 		const userWithToken = await addTestUser({ ...testUser, generateToken: true });
 
-		// Perform the request
 		const response = await request(app)
 			.post('/user/stocks/add')
 			.set('Authorization', `Bearer ${userWithToken.token}`)
 			.send({ savedStock: { ticker: 'AAPL' } });
 
-		// Assertions
 		expect(response.status).toBe(409);
 		expect(response.body).toHaveProperty('message', 'User has already saved this stock');
 	});

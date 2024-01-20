@@ -68,12 +68,19 @@ describe('Stock Routes', () => {
 		axios.get
 			.mockResolvedValueOnce({
 				data: {
-					/* Stock details */
+					results: [
+						{
+							/* Stock details */
+							c: 150, // Adjust the mock data as needed
+						},
+					],
 				},
 			})
 			.mockResolvedValueOnce({
 				data: {
 					/* Ticker details */
+					ticker: 'AAPL',
+					name: 'Apple Inc.',
 				},
 			});
 
@@ -82,6 +89,12 @@ describe('Stock Routes', () => {
 		expect(response.status).toBe(200);
 		expect(response.body).toHaveProperty('stock');
 		expect(response.body).toHaveProperty('ticker');
+
+		const { stock, ticker } = response.body;
+
+		expect(stock).toHaveProperty('c', 150); // Adjust the property as per your actual stock details
+		expect(ticker).toHaveProperty('ticker', 'AAPL');
+		expect(ticker).toHaveProperty('name', 'Apple Inc.');
 	});
 
 	it('should get stock history for a stock', async () => {
