@@ -215,7 +215,7 @@ const LoginForm = (props) => {
 			{!formSuccess && (
 				<form
 					onSubmit={props.isSignup ? handleSubmitSignup : handleSubmitLogin}
-					className='flex flex-col items-center max-w-md xl:w-1/4 2xl:w-1/5 mx-auto'
+					className='flex flex-col items-center max-w-md xl:w-1/4 2xl:w-1/5 mx-auto md:w-1/2 sm:w-11/12'
 				>
 					{isLoading && (
 						<LoadingSpinner
@@ -260,7 +260,7 @@ const LoginForm = (props) => {
 					)}
 					<button
 						type='submit'
-						className='bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-1/3 py-3 px-4 mt-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all'
+						className='bg-emerald-900 border-2 border-emerald-900 text-white font-bold w-1/3 py-3 px-4 mt-4 rounded-full focus:border-transparent focus:ring focus:ring-white hover:bg-white hover:text-emerald-900 hover:border-emerald-900 transition-all md:w-full'
 					>
 						{props.isSignup ? 'Sign up' : 'Login'}
 					</button>

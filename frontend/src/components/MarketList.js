@@ -25,7 +25,7 @@ const MarketList = ({ title, items, onDrop, setText }) => {
 			className='border-1 border-black pt-0 pr-4 pl-4 pb-4 mr-4'
 		>
 			<h2 className='text-center text-base font-bold'>{title}</h2>
-			<ul className='min-w-52 list-style-none p-0'>
+			<ul className='min-w-52 list-style-none p-0 sm:min-w-0 sm:w-24'>
 				{items.map((mic) => (
 					<MicItem
 						key={mic}

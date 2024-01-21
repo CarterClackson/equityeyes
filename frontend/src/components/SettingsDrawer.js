@@ -312,8 +312,8 @@ const SettingsDrawer = (props) => {
 							</li>
 						</ul>
 					</form>
-					<div className='flex'>
-						<span className='text-base font-bold'>Your markets:</span>
+					<div className='flex sm:flex-col'>
+						<span className='text-base font-bold sm:mb-4'>Your markets:</span>
 						<DndProvider
 							backend={TouchBackend}
 							options={{ enableMouseEvents: true }}

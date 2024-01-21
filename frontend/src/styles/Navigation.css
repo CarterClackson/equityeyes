@@ -1,0 +1,30 @@
+.mobile-nav {
+	background-color: rgba(0, 0, 0, 0.95);
+	transition: all 0.3s;
+}
+.mobile-menu-show {
+	opacity: 1;
+	visibility: visible;
+}
+.mobile-menu-hide {
+	opacity: 0;
+	visibility: hidden;
+}
+
+@media screen and (max-width: 768px) {
+	.desktop-nav {
+		display: none;
+	}
+	.mobile-menu-button {
+		display: block;
+	}
+}
+
+@media screen and (min-width: 769px) {
+	.mobile-nav {
+		display: none;
+	}
+	.mobile-menu-button {
+		display: none;
+	}
+}
