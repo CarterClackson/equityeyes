@@ -1,12 +1,20 @@
 /* Routes for returning details about all stocks in the collection */
 const express = require('express');
 const axios = require('axios');
-const { restart } = require('nodemon');
 
 const Stock = require('../models/stock');
 const User = require('../models/user');
 
 const verifyToken = require('../middleware/authenticate');
+
+require('dotenv').config();
+
+const environment = process.env.NODE_ENV || 'dev';
+
+if (environment === 'production') {
+} else {
+	const { restart } = require('nodemon');
+}
 
 const router = express.Router();
 

@@ -22,7 +22,6 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 				}
 
 				const data = await response.json();
-				console.log(marketData);
 				if (Object.keys(marketData).length) {
 					setSearchResults(marketData);
 				} else {
@@ -112,7 +111,7 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 	};
 
 	return (
-		<div className='relative search-bar flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4'>
+		<div className='relative search-bar flex flex-col border-4 border-emerald-900 rounded-lg p-8 mt-4 sm:p-4 sm:pt-12'>
 			<input
 				type='text'
 				placeholder='Search stocks...'
@@ -135,9 +134,9 @@ const StockSearch = ({ onStockSelect, onForceUpdate, onShowSearch, loadDetailsVi
 							<li
 								key={result.symbol}
 								onClick={() => loadDetailsView(result.symbol)}
-								className='flex items-center justify-between w-fit text-zinc-50 text-lg py-1 px-4 ml-2 rounded-lg border-2 border-transparent hover:border-emerald-700 transition-all cursor-pointer'
+								className='flex items-center justify-between w-fit text-zinc-50 text-lg py-1 px-4 ml-2 rounded-lg border-2 border-transparent hover:border-emerald-700 transition-all cursor-pointer sm:px-2 sm:pr-3 sm:ml-0 sm:w-full'
 							>
-								<div>
+								<div className='sm:max-w-40'>
 									{boldSearchTerm(result.symbol, searchQuery)} - {boldSearchTerm(result.name, searchQuery)}
 								</div>
 								<button

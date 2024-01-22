@@ -11,6 +11,7 @@ import '../styles/UIElements/Form.css';
 const HomePage = () => {
 	const [showSettings, setShowSettings] = useState(false);
 	const [userID, setUserID] = useState('');
+	const [marketData, setMarketData] = useState({});
 
 	const getUserId = async () => {
 		try {
@@ -35,6 +36,27 @@ const HomePage = () => {
 		setShowSettings((prevState) => !prevState);
 	};
 
+	const handleMarketsChange = async () => {
+		try {
+			const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}stocks`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					Authorization: `Bearer ${getAuthToken()}`,
+				},
+			});
+
+			if (!response.ok) {
+				throw new Error('Network response was not ok');
+			}
+
+			const data = await response.json();
+			setMarketData(data);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -53,8 +75,8 @@ const HomePage = () => {
 			<Nav showSettings={() => handleShowSettings()} />
 			<section className='bg-section bg-cover bg-center h-full min-h-svh relative'>
 				<div className='inset-0 bg-black-50 text-white p-4 pt-44 flex flex-col justify-center items-center h-full min-h-svh'>
-					<h1 className='text-4xl font-bold mb-2'>Welcome to equityEyes</h1>
-					<p className='text-white/90 text-center pb-6 mb-12 w-1/3'>
+					<h1 className='text-4xl font-bold mb-2 sm:text-center sm:mb-4'>Welcome to equityEyes</h1>
+					<p className='text-white/90 text-center pb-6 mb-12 w-1/3 sm:w-2/3'>
 						Your personalized stock companion for informed investing
 					</p>
 					<span className='text-white/90 pb-6'>Interested in joining?</span>
@@ -70,6 +92,9 @@ const HomePage = () => {
 					className={showSettings ? 'open' : ''}
 					showSettings={() => {
 						handleShowSettings();
+					}}
+					changeMarkets={() => {
+						handleMarketsChange();
 					}}
 				/>
 			)}

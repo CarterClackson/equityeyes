@@ -137,12 +137,12 @@ const DataPanel = (props) => {
 				</div>
 			)}
 			<h1 className='text-3xl font-bold pb-4'>My Stocks</h1>
-			<div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
+			<div className='grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4'>
 				{data.map((stock, index) => (
 					<div
 						key={index}
 						onClick={() => loadDetailsView(stock.symbol)}
-						className='relative bg-emerald-900 border-4 border-transparent p-6 rounded-lg hover:border-4 hover:border-emerald-700 transition-all cursor-pointer'
+						className='relative bg-emerald-900 border-4 border-transparent p-6 rounded-lg hover:border-4 hover:border-emerald-700 transition-all cursor-pointer md:p-4 sm:p-4'
 					>
 						<span
 							className='absolute right-0 top-0 text-base text-zinc-50 font-extrabold hover:text-emerald-600 transition-all py-2 px-3 z-10'

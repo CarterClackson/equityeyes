@@ -150,11 +150,16 @@ const DetailsView = (props) => {
 				</h1>
 				<p className='leading-5'>{renderDescription()}</p>
 				<StockChart ticker={tickerData.ticker} />
-				<div className='flex'>
-					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
-						<h3 className='text-xl font-bold text-zinc-50 text-center'>Daily High</h3>
+				<div className='flex sm:flex-col'>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2 md:py-4 md:px-2 sm:my-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center md:text-lg'>Daily High</h3>
 						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
-						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.h, buyInPrice)} `}>
+						<span
+							className={`text-2xl font-bold text-green-500 text-center ${arrowColor(
+								stockData.h,
+								buyInPrice
+							)} md:text-xl`}
+						>
 							{stockData.h > buyInPrice ? (
 								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
@@ -163,10 +168,15 @@ const DetailsView = (props) => {
 							{stockData.h} <span className='text-base'>{percentChange(stockData.h, buyInPrice)}</span>{' '}
 						</span>
 					</div>
-					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
-						<h3 className='text-xl font-bold text-zinc-50 text-center'>Daily Low</h3>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2 md:py-4 md:px-2 sm:my-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center md:text-lg'>Daily Low</h3>
 						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
-						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.l, buyInPrice)} `}>
+						<span
+							className={`text-2xl font-bold text-green-500 text-center ${arrowColor(
+								stockData.l,
+								buyInPrice
+							)} md:text-xl`}
+						>
 							{stockData.l > buyInPrice ? (
 								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
@@ -175,10 +185,15 @@ const DetailsView = (props) => {
 							{stockData.l} <span className='text-base'>{percentChange(stockData.l, buyInPrice)}</span>{' '}
 						</span>
 					</div>
-					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
-						<h3 className='text-xl font-bold text-zinc-50 text-center'>Daily Open</h3>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2 md:py-4 md:px-2 sm:my-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center md:text-lg'>Daily Open</h3>
 						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
-						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.o, buyInPrice)} `}>
+						<span
+							className={`text-2xl font-bold text-green-500 text-center ${arrowColor(
+								stockData.o,
+								buyInPrice
+							)} md:text-xl`}
+						>
 							{stockData.o > buyInPrice ? (
 								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
@@ -187,10 +202,15 @@ const DetailsView = (props) => {
 							{stockData.o} <span className='text-base'>{percentChange(stockData.o, buyInPrice)}</span>{' '}
 						</span>
 					</div>
-					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2'>
-						<h3 className='text-xl font-bold text-zinc-50 text-center'>Previous Close</h3>
+					<div className='flex flex-auto flex-col bg-zinc-900 p-4 rounded-lg mx-2 md:py-4 md:px-2 sm:my-2'>
+						<h3 className='text-xl font-bold text-zinc-50 text-center md:text-lg'>Previous Close</h3>
 						<span className='text-md font-light text-zinc-500 text-center'>{unixToFormattedData(stockData.t)}</span>
-						<span className={`text-2xl font-bold text-green-500 text-center ${arrowColor(stockData.c, buyInPrice)} `}>
+						<span
+							className={`text-2xl font-bold text-green-500 text-center ${arrowColor(
+								stockData.c,
+								buyInPrice
+							)} md:text-xl`}
+						>
 							{stockData.c > buyInPrice ? (
 								<i className='fas fa-sharp fa-solid fa-arrow-up'></i>
 							) : (
@@ -211,7 +231,7 @@ const DetailsView = (props) => {
 					>
 						View News
 					</button>
-					<div className='flex grid-rows-1'>
+					<div className='flex grid-rows-1 md:flex-col sm:flex-col'>
 						{isLoading && (
 							<LoadingSpinner
 								asSearchOverlay
@@ -222,7 +242,7 @@ const DetailsView = (props) => {
 							stockNews.map((stock, index) => (
 								<div
 									key={index}
-									className='flex flex-col items-center min-h-48 p-4 mx-2 border-4 border-emerald-900 rounded-lg w-1/3'
+									className='flex flex-col items-center min-h-48 p-4 mx-2 border-4 border-emerald-900 rounded-lg w-1/3 md:w-full md:mb-2 sm:w-full sm:mb-2'
 								>
 									<h4 className='self-start text-yellow-400 text-xl font-bold'>
 										<a href={`${stock.article_url}`}>{stock.title.slice(0, 50) + '...'}</a>

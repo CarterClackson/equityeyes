@@ -2,13 +2,21 @@
 
 const express = require('express');
 const axios = require('axios');
-const { restart } = require('nodemon');
 const moment = require('moment-timezone');
 
 const router = express.Router();
 
 const baseURL = 'https://api.polygon.io/v1';
 const apiKey = process.env.POLYGON_API_KEY;
+
+require('dotenv').config();
+
+const environment = process.env.NODE_ENV || 'dev';
+
+if (environment === 'production') {
+} else {
+	const { restart } = require('nodemon');
+}
 
 //Get moving average values at interval timeframe. If week it's once per week.
 router.get('/:symbol/sma/:timeFrame', async (req, res) => {
